@@ -1,3 +1,5 @@
-import { time } from "@/utils";
+import { log } from "./utils";
 
-console.log(time, "coi");
+(async () => {
+  log("doggie");
+})();
