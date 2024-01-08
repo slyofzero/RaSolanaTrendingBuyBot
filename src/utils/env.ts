@@ -1,4 +1,4 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-export const { DEX_URL } = process.env;
+export const { BOT_TOKEN, FIREBASE_KEY } = process.env;

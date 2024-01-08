@@ -1,7 +1,8 @@
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      DEX_URL: string | undefined;
+      BOT_TOKEN: string | undefined;
+      FIREBASE_KEY: string | undefined;
     }
   }
 }
