@@ -1,6 +1,6 @@
 import { getDocument } from "@/firebase";
 import { BotCallbackContextType, StoredWallet } from "@/types";
-import { sendMessage } from "@/utils";
+import { sendMessage } from "@/utils/bot";
 
 export async function walletCallback(ctx: BotCallbackContextType) {
   const chatId = ctx.chat?.id || "";

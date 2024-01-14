@@ -1,6 +1,7 @@
 import { WhereFilterOp } from "firebase-admin/firestore";
 import { db } from "./config";
-import { firebaseCollectionPrefix } from "@/utils";
+
+const collectionPrefix = "_ton_buy_bot";
 
 interface addDocumentInterface {
   data: object;
@@ -33,7 +34,7 @@ interface updateDocumentByIdInterface {
 }
 
 export const addDocument = async ({ data, collectionName, id }: addDocumentInterface) => {
-  collectionName += firebaseCollectionPrefix;
+  collectionName += collectionPrefix;
   const collectionRef = db.collection(collectionName);
   let docRef: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData> | null = null;
 
@@ -49,7 +50,7 @@ export const addDocument = async ({ data, collectionName, id }: addDocumentInter
 
 export const removeDocumentById = async ({ collectionName, id }: removeDocumentInterface) => {
   try {
-    collectionName += firebaseCollectionPrefix;
+    collectionName += collectionPrefix;
     const collectionRef = db.collection(collectionName);
     const docRef = collectionRef.doc(id);
 
@@ -70,7 +71,7 @@ export const removeDocument = async ({
   collectionName,
   limit: _limit,
 }: getDocumentInterface) => {
-  collectionName += firebaseCollectionPrefix;
+  collectionName += collectionPrefix;
   const collectionRef = db.collection(collectionName);
   let queryRef: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = collectionRef;
 
@@ -96,7 +97,7 @@ export const removeDocument = async ({
 };
 
 export const getDocumentById = async ({ collectionName, id }: getDocumentByIdInterface) => {
-  collectionName += firebaseCollectionPrefix;
+  collectionName += collectionPrefix;
   const docRef = db.collection(collectionName).doc(id);
   const docSnapshot = await docRef.get();
 
@@ -113,7 +114,7 @@ export const getDocument = async ({
   collectionName,
   limit: _limit,
 }: getDocumentInterface) => {
-  collectionName += firebaseCollectionPrefix;
+  collectionName += collectionPrefix;
   const collectionRef = db.collection(collectionName);
   let queryRef: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = collectionRef;
 
@@ -145,7 +146,7 @@ export const updateDocumentById = async ({
   updates,
   collectionName,
 }: updateDocumentByIdInterface) => {
-  collectionName += firebaseCollectionPrefix;
+  collectionName += collectionPrefix;
   const dataRef = db.collection(collectionName).doc(id);
   await dataRef.update(updates);
   const docSnap = await dataRef.get();

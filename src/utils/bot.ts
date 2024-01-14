@@ -2,12 +2,7 @@ import { teleBot } from "..";
 import { SendMessagePropsType, SendMessageReturnType } from "@/types";
 
 export function cleanUpBotMessage(text: string) {
-  text = text
-    .replace(/\./g, "\\.")
-    .replace(/-/g, "\\-")
-    .replace(/\(/g, "\\(")
-    .replace(/\)/g, "\\)")
-    .replace(/#/g, "\\#");
+  text = text.replace(/\./g, "\\.").replace(/-/g, "\\-").replace(/!/g, "\\!").replace(/#/g, "\\#");
 
   return text;
 }
