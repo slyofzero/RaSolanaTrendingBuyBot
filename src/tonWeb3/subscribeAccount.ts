@@ -52,7 +52,6 @@ export async function subscribeAccount() {
           for (const out_msg of transaction.out_msgs) {
             if (out_msg.decoded_op_name?.trim() === "jetton_internal_transfer") {
               const hash = transaction.hash;
-              log(`Transaction caught ${hash}`);
 
               const sender = Address.parseRaw(
                 transaction.in_msg?.decoded_body?.response_destination
