@@ -25,7 +25,9 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
     const { chatId } = group;
     const { decimals, name, symbol } = (await client.jettons.getJettonInfo(jetton)).metadata;
 
-    const receivedAmount = Math.floor(Number(amount) / 10 ** Number(decimals));
+    const receivedAmount = parseFloat(
+      (Number(amount) / 10 ** Number(decimals)).toFixed(3)
+    ).toString();
     const cleanedName = cleanUpBotMessage(name).replace(/\(/g, "\\(").replace(/\)/g, "\\)");
     const shortendReceiver = `${receiver.slice(0, 3)}...${receiver.slice(
       receiver.length - 3,
