@@ -1,4 +1,4 @@
-import { addDocument } from "@/firebase";
+import { addDocument, getDocument, updateDocumentById } from "@/firebase";
 import { BotCommandContextType, StoredGroup } from "@/types";
 import { cleanUpBotMessage } from "@/utils/bot";
 import { BOT_USERNAME } from "@/utils/env";
@@ -19,9 +19,27 @@ export async function startBot(ctx: BotCommandContextType) {
 
       try {
         const newAddress = Address.parse(jetton).toRawString();
-        ctx.reply(cleanUpBotMessage(text), { parse_mode: "MarkdownV2" });
-        const data: StoredGroup = { chatId: String(chatId), jetton: newAddress };
-        addDocument({ data, collectionName: "project_groups" });
+        const projectData =
+          ((
+            await getDocument({
+              collectionName: "project_groups",
+              queries: [["chatId", "==", String(chatId)]],
+            })
+          ).at(0) as StoredGroup) || undefined;
+
+        if (projectData) {
+          ctx.reply(cleanUpBotMessage(text), { parse_mode: "MarkdownV2" });
+          const updates = { jetton: newAddress };
+          updateDocumentById({
+            updates,
+            collectionName: "project_groups",
+            id: projectData.id || "",
+          });
+        } else {
+          ctx.reply(cleanUpBotMessage(text), { parse_mode: "MarkdownV2" });
+          const data: StoredGroup = { chatId: String(chatId), jetton: newAddress };
+          addDocument({ data, collectionName: "project_groups" });
+        }
       } catch (error) {
         ctx.reply("The jetton address you passed was incorrect.");
       }
