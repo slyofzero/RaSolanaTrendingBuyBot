@@ -8,7 +8,7 @@ import { addNewTransfer } from "@/vars/newTransfers";
 
 // Configure the HTTP client with your host and token
 
-export async function subscribeAccount() {
+export function subscribeAccount() {
   if (!WSS_ENDPOINT) {
     return stopScript("WSS endpoint is undefined");
   }
@@ -81,10 +81,20 @@ export async function subscribeAccount() {
   });
 
   socket.addEventListener("close", (event) => {
-    log(`WebSocket connection closed: ${event}`);
+    const { code, reason, wasClean } = event;
+    log(`WebSocket connection closed. Code: ${code}, Reason: ${reason}, Clean: ${wasClean}`);
+
+    setTimeout(function () {
+      subscribeAccount();
+    }, 60 * 1e3);
   });
 
   socket.addEventListener("error", (event) => {
-    log(`WebSocket error: ${event}`);
+    const { message } = event;
+    log(`WebSocket connection closed. Message: ${message}`);
+
+    setTimeout(function () {
+      subscribeAccount();
+    }, 60 * 1e3);
   });
 }
