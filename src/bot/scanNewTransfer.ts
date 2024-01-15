@@ -4,7 +4,7 @@ import { cleanUpBotMessage, sendMessage } from "@/utils/bot";
 import { log } from "@/utils/handlers";
 import { client } from "..";
 import { sleep } from "@/utils/time";
-import { EXPLORER_URL } from "@/utils/env";
+import { DEX_URL, EXPLORER_URL } from "@/utils/env";
 import { getDocument } from "@/firebase";
 import { StoredGroup } from "@/types";
 
@@ -33,13 +33,15 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       receiver.length - 3,
       receiver.length
     )}`;
+    const swapUrl = `${DEX_URL}/swap?chartVisible=true&tt=TON&ft=${symbol}`;
 
     const text = `*${cleanedName} Buy!*
 🟢🟢🟢🟢🟢
 Got: ${receivedAmount} ${symbol}
 Buyer: [${shortendReceiver}](${EXPLORER_URL}/${receiver})
 
-[View Tx](${EXPLORER_URL}/transaction/${hash})`;
+[View Tx](${EXPLORER_URL}/transaction/${hash})
+[Chart \\| Swap](${swapUrl})`;
     // @ts-expect-error disable_web_page_preview not in type
     sendMessage(chatId, text, { disable_web_page_preview: true });
     return true;

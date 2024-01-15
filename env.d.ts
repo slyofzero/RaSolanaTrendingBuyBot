@@ -8,6 +8,7 @@ declare global {
       BOT_USERNAME: string | undefined;
       TONCLIENT_ENDPOINT: string | undefined;
       EXPLORER_URL: string | undefined;
+      DEX_URL: string | undefined;
     }
   }
 }

@@ -9,4 +9,5 @@ export const {
   BOT_USERNAME,
   TONCLIENT_ENDPOINT,
   EXPLORER_URL,
+  DEX_URL,
 } = process.env;
