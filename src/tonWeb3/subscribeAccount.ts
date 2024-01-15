@@ -83,12 +83,12 @@ export function subscribeAccount() {
   socket.addEventListener("close", (event) => {
     const { code, reason, wasClean } = event;
     log(`WebSocket connection closed. Code: ${code}, Reason: ${reason}, Clean: ${wasClean}`);
-    process.exit(0);
+    process.exit(1);
   });
 
   socket.addEventListener("error", (event) => {
     const { message } = event;
     log(`WebSocket connection closed. Message: ${message}`);
-    process.exit(0);
+    process.exit(1);
   });
 }
