@@ -34,15 +34,17 @@ log("Bot instance ready");
 const interval = 20;
 
 (async function () {
-  teleBot.start();
-  log("Telegram bot setup");
-  initiateBotCommands();
-  initiateCallbackQueries();
-  subscribeAccount();
+  console.log("test");
+  process.exit(0);
+  // teleBot.start();
+  // log("Telegram bot setup");
+  // initiateBotCommands();
+  // initiateCallbackQueries();
+  // subscribeAccount();
 
-  async function toRepeat() {
-    await checkNewTransfer();
-    setTimeout(toRepeat, interval * 1e3);
-  }
-  await toRepeat();
+  // async function toRepeat() {
+  //   await checkNewTransfer();
+  //   setTimeout(toRepeat, interval * 1e3);
+  // }
+  // await toRepeat();
 })();
