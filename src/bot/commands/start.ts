@@ -44,7 +44,7 @@ export async function startBot(ctx: BotCommandContextType) {
         ctx.reply("The jetton address you passed was incorrect.");
       }
     } else {
-      text += `Thank you for choosing ${BOT_USERNAME}. To start the buy bot reply send a message in the below format -\n/start \\<jetton address\\>.`;
+      text += `To start the buy, add \\@${BOT_USERNAME} as an admin \\(this allows the bot to send messages\\) and then do /start in the below format -\n/start \\<jetton address\\>.`;
       ctx.reply(cleanUpBotMessage(text), { parse_mode: "MarkdownV2" });
     }
   }
