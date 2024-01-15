@@ -35,7 +35,7 @@ const interval = 20;
 
 (async function () {
   console.log("test");
-  process.exit(0);
+  process.exit(1);
   // teleBot.start();
   // log("Telegram bot setup");
   // initiateBotCommands();
