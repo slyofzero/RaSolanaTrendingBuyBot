@@ -10,4 +10,5 @@ export const {
   TONCLIENT_ENDPOINT,
   EXPLORER_URL,
   DEX_URL,
+  TONCLIENT_API_KEY,
 } = process.env;

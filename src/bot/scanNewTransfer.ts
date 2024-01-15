@@ -1,7 +1,7 @@
 import { getJetton } from "@/tonWeb3";
 import { NewTransfer } from "@/types/var";
 import { cleanUpBotMessage, sendMessage } from "@/utils/bot";
-import { log } from "@/utils/handlers";
+import { errorHandler, log } from "@/utils/handlers";
 import { client } from "..";
 import { sleep } from "@/utils/time";
 import { DEX_URL, EXPLORER_URL } from "@/utils/env";
@@ -44,9 +44,12 @@ Buyer: [${shortendReceiver}](${EXPLORER_URL}/${receiver})
 [Chart \\| Swap](${swapUrl})`;
     // @ts-expect-error disable_web_page_preview not in type
     sendMessage(chatId, text, { disable_web_page_preview: true });
+
     return true;
   } catch (error) {
     log("Retrying notification");
+    errorHandler(error);
+
     await sleep(1500);
     return await scanNewTransfer(newTransfer);
   }
