@@ -13,11 +13,10 @@ export function initiateBotCommands() {
     { command: "setgif", description: "To set a GIF" },
   ]);
 
-  // teleBot.use(onlyAdmin((ctx) => ctx.reply("Only admins can do this")));
   teleBot.command("start", (ctx) => startBot(ctx));
   teleBot.command("settings", (ctx) => settings(ctx));
   teleBot.command("setemoji", (ctx) => setEmojiCommand(ctx));
-  teleBot.command("setgif", (ctx) => setGifCommand(ctx));
+  teleBot.hears(/\/setgif/, (ctx) => setGifCommand(ctx));
 
   log("Bot commands up");
 }

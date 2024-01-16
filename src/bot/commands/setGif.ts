@@ -1,10 +1,14 @@
 import { getDocument, updateDocumentById } from "@/firebase";
-import { BotCommandContextType, StoredGroup } from "@/types";
+import { StoredGroup } from "@/types";
 import { log } from "@/utils/handlers";
 import { onlyAdmin } from "../utils";
+import { Context, HearsContext } from "grammy";
 
-export async function setGifCommand(ctx: BotCommandContextType) {
+export async function setGifCommand(ctx: HearsContext<Context>) {
   const { id: chatId, type } = ctx.chat;
+  const { message, channel_post } = ctx.update;
+  const { animation, video } = message || channel_post;
+  const videoSource = animation || video;
 
   let text = "";
   if (type === "private") {
@@ -16,10 +20,8 @@ export async function setGifCommand(ctx: BotCommandContextType) {
   const isAdmin = await onlyAdmin(ctx);
   if (!isAdmin) return false;
 
-  const animation = ctx.update.channel_post?.reply_to_message?.animation;
-
-  if (animation) {
-    const { file_id: gif, mime_type } = animation;
+  if (videoSource) {
+    const { file_id: gif, mime_type } = videoSource;
     const isValidMimeType = mime_type?.includes("video") || mime_type?.includes("gif");
 
     if (isValidMimeType) {
