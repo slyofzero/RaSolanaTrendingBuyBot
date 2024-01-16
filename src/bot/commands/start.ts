@@ -7,10 +7,10 @@ import { Address } from "@ton/ton";
 export async function startBot(ctx: BotCommandContextType) {
   const { match: jetton } = ctx;
   const { id: chatId, type } = ctx.chat;
-  let text = `*Welcome to ${BOT_USERNAME}*\n\n`;
+  let text = `*Welcome to ${BOT_USERNAME}!!!*\n\n`;
 
   if (type === "private") {
-    text += `To use the bot, add it to the group or channel as an admin \\(this allows the bot to send messages\\). You'll be guided for the further steps when you do /start there.`;
+    text += `@${BOT_USERNAME} needs to be added to your project telegram. By adding @${BOT_USERNAME} to your Base Chain project \\(TON\\), you will be able to view the buys, marketcap and transactions real time.\n\nHype your project with a dedicated Base Chain buy bot today!`;
 
     ctx.reply(cleanUpBotMessage(text), { parse_mode: "MarkdownV2" });
   } else {

@@ -4,7 +4,7 @@ import { cleanUpBotMessage, sendMessage } from "@/utils/bot";
 import { errorHandler, log } from "@/utils/handlers";
 import { client } from "..";
 import { sleep } from "@/utils/time";
-import { DEX_URL, EXPLORER_URL, GECKO_API } from "@/utils/env";
+import { BOT_USERNAME, DEX_URL, EXPLORER_URL, GECKO_API } from "@/utils/env";
 import { getDocument } from "@/firebase";
 import { StoredGroup, TokenPoolData } from "@/types";
 import { apiFetcher } from "@/utils/api";
@@ -41,6 +41,7 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       base_token_price_native_currency: price_ton,
       fdv_usd,
       market_cap_usd,
+      address,
     } = data.attributes;
 
     const receivedAmount = parseFloat((Number(amount) / 10 ** Number(decimals)).toFixed(3));
@@ -53,13 +54,14 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       receiver.length
     )}`;
     const swapUrl = `${DEX_URL}/swap?chartVisible=true&tt=TON&ft=${symbol}`;
+    const chartUrl = `https://www.geckoterminal.com/ton/pools/${address}`;
     let emojiCount = 0;
 
     const randomizeEmojiCount = (min: number, max: number) =>
       Math.floor(Math.random() * (max - min + 1)) + min;
 
     if (spentUSD <= 10) {
-      emojiCount = randomizeEmojiCount(1, 10);
+      emojiCount = randomizeEmojiCount(5, 10);
     } else if (spentUSD <= 50) {
       emojiCount = randomizeEmojiCount(10, 35);
     } else if (spentUSD <= 100) {
@@ -78,14 +80,15 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       const text = `*${cleanedName} Buy!*
 ${greenEmojis}
 
-💰 Spent: ${spentTON} TON \\($${spentUSD}\\)
-🤑 Got: ${receivedAmount.toString()} ${symbol}
-👤 Buyer: [${shortendReceiver}](${EXPLORER_URL}/${receiver})
-🧢 MCap: \\$${formatNumber(market_cap_usd || fdv_usd)}
-💲 Price: \\$${Number(price_usd).toFixed(3)}
+💲 *Spent*: ${spentTON} TON \\($${spentUSD}\\)
+💰 *Got*: ${receivedAmount.toString()} ${symbol}
+👤 *Buyer*: [${shortendReceiver}](${EXPLORER_URL}/${receiver})
+📊 *MCap*: \\$${formatNumber(market_cap_usd || fdv_usd)}
+🏷 *Price*: \\$${Number(price_usd).toFixed(3)}
 
-✨ [View Tx](${EXPLORER_URL}/transaction/${hash})
-[📊 Chart \\| 🔀 Swap](${swapUrl})`;
+[✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [📊 Chart](${chartUrl}) \\| [🔀 Swap](${swapUrl})
+
+Powered by @${BOT_USERNAME}`;
 
       // @ts-expect-error disable_web_page_preview not in type
       sendMessage(chatId, text, { disable_web_page_preview: true });

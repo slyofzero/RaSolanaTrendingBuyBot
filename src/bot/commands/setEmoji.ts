@@ -1,17 +1,16 @@
 import { getDocument, updateDocumentById } from "@/firebase";
 import { BotCommandContextType, StoredGroup } from "@/types";
+import { log } from "@/utils/handlers";
 
-export async function setEmoji(ctx: BotCommandContextType) {
+export async function setEmojiCommand(ctx: BotCommandContextType) {
   const { match: emoji } = ctx;
   const { id: chatId, type } = ctx.chat;
 
-  if (type === "private") return false;
-
   let text = "";
+  if (type === "private") text = "Only works in groups or channels";
 
   if (!emoji) {
-    text =
-      "Your custom emoji would replace 🟢 in the messages. To set it do - /set_emoji \\<emoji\\>";
+    text = "Missing emoji. To set it do - /set_emoji <emoji>";
   } else {
     const group =
       ((
@@ -27,8 +26,11 @@ export async function setEmoji(ctx: BotCommandContextType) {
         collectionName: "project_groups",
         updates: { emoji: emoji },
       });
+
+      log(`Set emoji ${emoji} for ${chatId}`);
+      text = `New emoji ${emoji} set`;
     }
   }
 
-  ctx.reply(text, { parse_mode: "MarkdownV2" });
+  ctx.reply(text);
 }
