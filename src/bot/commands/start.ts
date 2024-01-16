@@ -3,6 +3,7 @@ import { BotCommandContextType, StoredGroup } from "@/types";
 import { cleanUpBotMessage } from "@/utils/bot";
 import { BOT_USERNAME } from "@/utils/env";
 import { Address } from "@ton/ton";
+import { onlyAdmin } from "../utils";
 
 export async function startBot(ctx: BotCommandContextType) {
   const { match: jetton } = ctx;
@@ -14,6 +15,9 @@ export async function startBot(ctx: BotCommandContextType) {
 
     ctx.reply(cleanUpBotMessage(text), { parse_mode: "MarkdownV2" });
   } else {
+    const isAdmin = await onlyAdmin(ctx);
+    if (!isAdmin) return false;
+
     if (jetton) {
       text = `This ${type} would now get updates for \`${jetton}\` buys. Each time the bot detects a buy for your jetton, a message would be sent in this group with some data about it.\n\nTo change the jetton address do -\n/start \\<jetton address\\>.`;
 

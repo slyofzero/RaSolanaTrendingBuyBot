@@ -90,8 +90,6 @@ ${greenEmojis}
 
 Powered by @${BOT_USERNAME}`;
 
-      console.log("sending ONE MESSAGE BITCH");
-
       if (group.gif) {
         await teleBot.api.sendVideo(chatId, group.gif);
       }
