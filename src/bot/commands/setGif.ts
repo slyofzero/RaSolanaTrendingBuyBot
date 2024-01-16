@@ -3,7 +3,7 @@ import { BotCommandContextType, StoredGroup } from "@/types";
 import { log } from "@/utils/handlers";
 import { onlyAdmin } from "../utils";
 
-export async function setEmojiCommand(ctx: BotCommandContextType) {
+export async function setGifCommand(ctx: BotCommandContextType) {
   const { match: emoji } = ctx;
   const { id: chatId, type } = ctx.chat;
 

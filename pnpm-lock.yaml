@@ -20,6 +20,9 @@ dependencies:
   grammy:
     specifier: ^1.20.3
     version: 1.20.3
+  grammy-middlewares:
+    specifier: ^1.0.11
+    version: 1.0.11
   moment:
     specifier: ^2.29.4
     version: 2.29.4
@@ -247,6 +250,13 @@ packages:
       - supports-color
     dev: false
     optional: true
+
+  /@grammyjs/runner@1.0.4:
+    resolution: {integrity: sha512-77IE+2Gg0UHa9MNZ8wsculxJpzUDcHTrMg7OLbKoQ8jWKFxX78sdxRBwL+FK3NvHZ15YnXsnxesV43xgbOhteA==}
+    engines: {node: '>=12.20.0 || >=14.13.1'}
+    dependencies:
+      abort-controller: 3.0.0
+    dev: false
 
   /@grammyjs/types@3.4.6:
     resolution: {integrity: sha512-J7xb4JFmdTG2JXDirytp9KuUBKhzT8cAeB3tg2dyWy0VzF/Pdi1t8YaBmNsGeL6VvdvAXHtBTfzrc3jBTD2Kuw==}
@@ -1054,6 +1064,13 @@ packages:
     dev: false
     optional: true
 
+  /envalid@7.3.1:
+    resolution: {integrity: sha512-KL1YRwn8WcoF/Ty7t+yLLtZol01xr9ZJMTjzoGRM8NaSU+nQQjSWOQKKJhJP2P57bpdakJ9jbxqQX4fGTOicZg==}
+    engines: {node: '>=8.12'}
+    dependencies:
+      tslib: 2.3.1
+    dev: false
+
   /escalade@3.1.1:
     resolution: {integrity: sha512-k0er2gUkLf8O0zKJiAhmkTnJlTvINGv7ygDNPbeIsX/TJjGJZHuh9B2UxbsaEkmlEo9MfhrSzmhIlhRlI2GXnw==}
     engines: {node: '>=6'}
@@ -1426,6 +1443,17 @@ packages:
       - supports-color
     dev: false
     optional: true
+
+  /grammy-middlewares@1.0.11:
+    resolution: {integrity: sha512-XASAQK25YOHoLKV0G1UEBH07oSc0nFIMltntyBV1BI5C2sEYKfcYkOp0xGt+SFT5EvLAbIHnyOy+riBnARKfhQ==}
+    dependencies:
+      '@grammyjs/runner': 1.0.4
+      envalid: 7.3.1
+      grammy: 1.20.3
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+    dev: false
 
   /grammy@1.20.3:
     resolution: {integrity: sha512-eHvS0iOD6aos7NbwL1dhFE6JDiMGm/Qz2TKgetRg/SZ5BIVoUSVSU/mn8L01r1Q7i+ywG9uePzy5xpK5CkOrUA==}
@@ -2323,6 +2351,10 @@ packages:
       minimist: 1.2.8
       strip-bom: 3.0.0
     dev: true
+
+  /tslib@2.3.1:
+    resolution: {integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==}
+    dev: false
 
   /tslib@2.6.2:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
