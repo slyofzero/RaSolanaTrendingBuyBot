@@ -7,7 +7,7 @@ export async function setEmojiCallback(ctx: BotCallbackContextType) {
   if (!isAdmin) return false;
 
   const text =
-    "The green circle emoji 🟢 in the messages would be replaced with your custom one.\n\nTo set an emoji do - /set_emoji <emoji>";
+    "The green circle emoji 🟢 in the messages would be replaced with your custom one.\n\nTo set an emoji do - /setemoji <emoji>";
 
   await ctx.editMessageText(text);
   await ctx.editMessageReplyMarkup({

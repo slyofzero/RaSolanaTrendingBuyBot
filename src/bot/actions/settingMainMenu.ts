@@ -11,6 +11,11 @@ export async function settingsMainMenu(ctx: BotCallbackContextType) {
 
   await ctx.editMessageText(text);
   await ctx.editMessageReplyMarkup({
-    reply_markup: new InlineKeyboard().text("Set emoji", "set-emoji").text("Set GIF", "set-gif"),
+    reply_markup: new InlineKeyboard()
+      .text("Set emoji", "set-emoji")
+      .text("Set GIF", "set-gif")
+      .row()
+      .text("Remove emoji", "remove-emoji")
+      .text("Remove GIF", "remove-gif"),
   });
 }

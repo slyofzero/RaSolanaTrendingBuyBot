@@ -18,7 +18,7 @@ export async function setEmojiCommand(ctx: BotCommandContextType) {
   if (!isAdmin) return false;
 
   if (!emoji) {
-    text = "Missing emoji. To set it do - /set_emoji <emoji>";
+    text = "Missing emoji. To set it do - /setemoji <emoji>";
   } else {
     const group =
       ((

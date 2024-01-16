@@ -2,17 +2,16 @@ import { BotCallbackContextType } from "@/types";
 import { InlineKeyboard } from "grammy";
 import { onlyAdmin } from "../utils";
 
-export async function setGifCallback(ctx: BotCallbackContextType) {
+export async function removeEmojiCallback(ctx: BotCallbackContextType) {
   const isAdmin = await onlyAdmin(ctx);
   if (!isAdmin) return false;
 
-  const text =
-    "A GIF can be sent every few interval with a buy message. To set a gif simply post it in the chat, and then to reply to that message with /setgif.";
+  const text = "Do you want to delete the emoji? It will revert back to 🟢.";
 
   await ctx.editMessageText(text);
   await ctx.editMessageReplyMarkup({
     reply_markup: new InlineKeyboard()
       .text("Main menu", "settings-main-menu")
-      .text("Set emoji", "set-emoji"),
+      .text("Set GIF", "set-gif"),
   });
 }

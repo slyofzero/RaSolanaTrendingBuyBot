@@ -2,9 +2,9 @@ import { getDocument, updateDocumentById } from "@/firebase";
 import { BotCommandContextType, StoredGroup } from "@/types";
 import { log } from "@/utils/handlers";
 import { onlyAdmin } from "../utils";
+import { teleBot } from "@/index";
 
 export async function setGifCommand(ctx: BotCommandContextType) {
-  const { match: emoji } = ctx;
   const { id: chatId, type } = ctx.chat;
 
   let text = "";
@@ -17,9 +17,10 @@ export async function setGifCommand(ctx: BotCommandContextType) {
   const isAdmin = await onlyAdmin(ctx);
   if (!isAdmin) return false;
 
-  if (!emoji) {
-    text = "Missing emoji. To set it do - /set_emoji <emoji>";
-  } else {
+  const fileId = ctx.update.channel_post?.reply_to_message?.animation?.file_id || "";
+  const gif = (await teleBot.api.getFile(fileId)).file_id;
+
+  if (gif) {
     const group =
       ((
         await getDocument({
@@ -32,11 +33,11 @@ export async function setGifCommand(ctx: BotCommandContextType) {
       await updateDocumentById({
         id: group.id,
         collectionName: "project_groups",
-        updates: { emoji: emoji },
+        updates: { gif: gif },
       });
 
-      log(`Set emoji ${emoji} for ${chatId}`);
-      text = `New emoji ${emoji} set`;
+      log(`Set GIF added ${gif} for ${chatId}`);
+      text = `New GIF set`;
     }
   }
 

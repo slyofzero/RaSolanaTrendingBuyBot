@@ -9,15 +9,15 @@ export function initiateBotCommands() {
   teleBot.api.setMyCommands([
     { command: "start", description: "Start the bot" },
     { command: "settings", description: "To customize the bot" },
-    { command: "set_emoji", description: "To set an emoji" },
-    { command: "set_gif", description: "To set a GIF" },
+    { command: "setemoji", description: "To set an emoji" },
+    { command: "setgif", description: "To set a GIF" },
   ]);
 
   // teleBot.use(onlyAdmin((ctx) => ctx.reply("Only admins can do this")));
   teleBot.command("start", (ctx) => startBot(ctx));
   teleBot.command("settings", (ctx) => settings(ctx));
-  teleBot.command("set_emoji", (ctx) => setEmojiCommand(ctx));
-  teleBot.command("set_gif", (ctx) => setGifCommand(ctx));
+  teleBot.command("setemoji", (ctx) => setEmojiCommand(ctx));
+  teleBot.command("setgif", (ctx) => setGifCommand(ctx));
 
   log("Bot commands up");
 }
