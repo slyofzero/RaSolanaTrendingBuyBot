@@ -11,4 +11,5 @@ export const {
   EXPLORER_URL,
   DEX_URL,
   TONCLIENT_API_KEY,
+  GECKO_API,
 } = process.env;

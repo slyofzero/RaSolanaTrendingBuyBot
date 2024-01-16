@@ -10,6 +10,7 @@ declare global {
       TONCLIENT_API_KEY: string | undefined;
       EXPLORER_URL: string | undefined;
       DEX_URL: string | undefined;
+      GECKO_API: string | undefined;
     }
   }
 }

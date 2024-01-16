@@ -4,9 +4,12 @@ import { cleanUpBotMessage, sendMessage } from "@/utils/bot";
 import { errorHandler, log } from "@/utils/handlers";
 import { client } from "..";
 import { sleep } from "@/utils/time";
-import { DEX_URL, EXPLORER_URL } from "@/utils/env";
+import { DEX_URL, EXPLORER_URL, GECKO_API } from "@/utils/env";
 import { getDocument } from "@/firebase";
-import { StoredGroup } from "@/types";
+import { StoredGroup, TokenPoolData } from "@/types";
+import { apiFetcher } from "@/utils/api";
+import { Address } from "@ton/ton";
+import { formatNumber } from "@/utils/general";
 
 export async function scanNewTransfer(newTransfer: NewTransfer) {
   try {
@@ -22,38 +25,68 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       return false;
     }
 
+    const { decimals, name, symbol } = (await client.jettons.getJettonInfo(jetton)).metadata;
+    const jettonAddress = Address.parseRaw(jetton).toString({ urlSafe: true });
+
+    const data = (
+      await apiFetcher<TokenPoolData>(
+        `${GECKO_API}/search/pools?query=${jettonAddress}&network=ton&page=1`
+      )
+    ).data.data.at(0);
+
+    if (!data) return false;
+
+    const {
+      base_token_price_usd: price_usd,
+      base_token_price_native_currency: price_ton,
+      fdv_usd,
+      market_cap_usd,
+    } = data.attributes;
+
+    const receivedAmount = parseFloat((Number(amount) / 10 ** Number(decimals)).toFixed(3));
+    const spentTON = parseFloat((receivedAmount * Number(price_ton)).toFixed(2));
+    const spentUSD = parseFloat((receivedAmount * Number(price_usd)).toFixed(2));
+
+    const cleanedName = cleanUpBotMessage(name).replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+    const shortendReceiver = `${receiver.slice(0, 3)}...${receiver.slice(
+      receiver.length - 3,
+      receiver.length
+    )}`;
+    const swapUrl = `${DEX_URL}/swap?chartVisible=true&tt=TON&ft=${symbol}`;
+    let emojiCount = 0;
+
+    const randomizeEmojiCount = (min: number, max: number) =>
+      Math.floor(Math.random() * (max - min + 1)) + min;
+
+    if (spentUSD <= 10) {
+      emojiCount = randomizeEmojiCount(1, 10);
+    } else if (spentUSD <= 50) {
+      emojiCount = randomizeEmojiCount(10, 35);
+    } else if (spentUSD <= 100) {
+      emojiCount = randomizeEmojiCount(35, 70);
+    } else if (spentUSD > 1000) {
+      emojiCount = randomizeEmojiCount(150, 200);
+    } else {
+      emojiCount = randomizeEmojiCount(70, 100);
+    }
+
     for (const group of groups) {
-      const { chatId } = group;
-      const { decimals, name, symbol } = (await client.jettons.getJettonInfo(jetton)).metadata;
+      const { chatId, emoji } = group;
 
-      const receivedAmount = parseFloat((Number(amount) / 10 ** Number(decimals)).toFixed(3));
-      const cleanedName = cleanUpBotMessage(name).replace(/\(/g, "\\(").replace(/\)/g, "\\)");
-      const shortendReceiver = `${receiver.slice(0, 3)}...${receiver.slice(
-        receiver.length - 3,
-        receiver.length
-      )}`;
-      const swapUrl = `${DEX_URL}/swap?chartVisible=true&tt=TON&ft=${symbol}`;
-      let emojiCount = 0;
-
-      if (receivedAmount <= 10) {
-        emojiCount = 3;
-      } else if (receivedAmount <= 100) {
-        emojiCount = 7;
-      } else if (receivedAmount <= 500) {
-        emojiCount = 12;
-      } else {
-        emojiCount = 20;
-      }
-      const greenEmojis = "🟢".repeat(emojiCount);
+      const greenEmojis = `${emoji || "🟢"}`.repeat(emojiCount);
 
       const text = `*${cleanedName} Buy!*
 ${greenEmojis}
 
+💰 Spent: ${spentTON} TON \\($${spentUSD}\\)
 🤑 Got: ${receivedAmount.toString()} ${symbol}
 👤 Buyer: [${shortendReceiver}](${EXPLORER_URL}/${receiver})
+🧢 MCap: \\$${formatNumber(market_cap_usd || fdv_usd)}
+💲 Price: \\$${Number(price_usd).toFixed(3)}
 
 ✨ [View Tx](${EXPLORER_URL}/transaction/${hash})
 [📊 Chart \\| 🔀 Swap](${swapUrl})`;
+
       // @ts-expect-error disable_web_page_preview not in type
       sendMessage(chatId, text, { disable_web_page_preview: true });
     }

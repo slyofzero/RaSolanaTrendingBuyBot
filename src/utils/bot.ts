@@ -7,13 +7,19 @@ export function cleanUpBotMessage(text: string) {
   return text;
 }
 
-export async function sendMessage(...props: SendMessagePropsType): Promise<SendMessageReturnType> {
-  const [chatId, text, other, signal] = props;
-  const cleanText = cleanUpBotMessage(text);
+export async function sendMessage(
+  ...props: SendMessagePropsType
+): Promise<SendMessageReturnType | false> {
+  try {
+    const [chatId, text, other, signal] = props;
+    const cleanText = cleanUpBotMessage(text);
 
-  const messageConfig = other || {};
-  messageConfig.parse_mode = "MarkdownV2";
+    const messageConfig = other || {};
+    messageConfig.parse_mode = "MarkdownV2";
 
-  const message = await teleBot.api.sendMessage(chatId, cleanText, messageConfig, signal);
-  return message;
+    const message = await teleBot.api.sendMessage(chatId, cleanText, messageConfig, signal);
+    return message;
+  } catch (error) {
+    return false;
+  }
 }
