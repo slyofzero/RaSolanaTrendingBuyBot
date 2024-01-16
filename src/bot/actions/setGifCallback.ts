@@ -13,6 +13,6 @@ export async function setGifCallback(ctx: BotCallbackContextType) {
   await ctx.editMessageReplyMarkup({
     reply_markup: new InlineKeyboard()
       .text("Main menu", "settings-main-menu")
-      .text("Set emoji", "set-emoji"),
+      .text("Remove gif", "remove-gif"),
   });
 }

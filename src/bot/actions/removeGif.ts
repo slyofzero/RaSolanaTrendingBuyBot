@@ -4,7 +4,7 @@ import { onlyAdmin } from "../utils";
 import { getDocument, updateDocumentById } from "@/firebase";
 import { log } from "@/utils/handlers";
 
-export async function removeEmojiCallback(ctx: BotCallbackContextType) {
+export async function removeGifCallback(ctx: BotCallbackContextType) {
   const isAdmin = await onlyAdmin(ctx);
   if (!isAdmin) return false;
 
@@ -21,31 +21,31 @@ export async function removeEmojiCallback(ctx: BotCallbackContextType) {
 
     if (group && group.id) {
       let text = "";
-      if (group.emoji) {
+      if (group.gif) {
         await updateDocumentById({
           id: group.id,
           collectionName: "project_groups",
-          updates: { emoji: null },
+          updates: { gif: null },
         });
 
-        log(`Emoji reset back to 🟢 for ${chatId}`);
-        text = "Emoji reset back to 🟢";
+        log(`GIF reset back to null for ${chatId}`);
+        text = "Removed the custom GIF";
       } else {
-        text = "You don't have a custom emoji set";
+        text = "You don't have a custom GIF set";
       }
       ctx.reply(text);
     }
   } else {
-    const text = "Do you want to delete the custom emoji? It will revert back to 🟢.";
+    const text = "Do you want to delete the custom GIF?";
 
     await ctx.editMessageText(text);
     await ctx.editMessageReplyMarkup({
       reply_markup: new InlineKeyboard()
-        .text("Yes", "confirm-remove-emoji")
+        .text("Yes", "confirm-remove-gif")
         .text("No")
         .row()
         .text("Main menu", "settings-main-menu")
-        .text("Set Emoji", "set-emoji"),
+        .text("Set GIF", "set-gif"),
     });
   }
 }

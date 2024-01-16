@@ -2,7 +2,7 @@ import { getJetton } from "@/tonWeb3";
 import { NewTransfer } from "@/types/var";
 import { cleanUpBotMessage, sendMessage } from "@/utils/bot";
 import { errorHandler, log } from "@/utils/handlers";
-import { client } from "..";
+import { client, teleBot } from "..";
 import { sleep } from "@/utils/time";
 import { BOT_USERNAME, DEX_URL, EXPLORER_URL, GECKO_API } from "@/utils/env";
 import { getDocument } from "@/firebase";
@@ -90,8 +90,13 @@ ${greenEmojis}
 
 Powered by @${BOT_USERNAME}`;
 
+      console.log("sending ONE MESSAGE BITCH");
+
+      if (group.gif) {
+        await teleBot.api.sendVideo(chatId, group.gif);
+      }
       // @ts-expect-error disable_web_page_preview not in type
-      sendMessage(chatId, text, { disable_web_page_preview: true });
+      await sendMessage(chatId, text, { disable_web_page_preview: true });
     }
 
     return true;

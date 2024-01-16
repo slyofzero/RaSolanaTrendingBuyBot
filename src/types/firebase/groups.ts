@@ -3,4 +3,5 @@ export interface StoredGroup {
   chatId: string;
   id?: string;
   emoji?: string;
+  gif?: string;
 }
