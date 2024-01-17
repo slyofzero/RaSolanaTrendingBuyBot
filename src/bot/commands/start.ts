@@ -23,7 +23,10 @@ export async function startBot(ctx: BotCommandContextType) {
     if (!isAdmin) return false;
 
     if (jetton) {
-      text = `This ${type} would now get updates for \`${jetton}\` buys. Each time the bot detects a buy for your jetton, a message would be sent in this group with some data about it.\n\nTo change the jetton address do -\n/start \\<jetton address\\>.`;
+      text = `This ${type} would now get updates for \`${jetton}\` buys. Each time the bot detects a buy for your jetton, a message would be sent in this group with some data about it.
+
+To configure buybot;
+type /settings`;
 
       try {
         const newAddress = Address.parse(jetton).toRawString();

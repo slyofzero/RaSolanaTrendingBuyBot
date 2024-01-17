@@ -19,19 +19,10 @@ export function initiateBotCommands() {
   teleBot.command("stop", (ctx) => stopBot(ctx));
   teleBot.command("settings", (ctx) => settings(ctx));
   teleBot.command("setemoji", (ctx) => setEmojiCommand(ctx));
-  // teleBot.hears(/\/setgif/, (ctx) => {
-  //   const { id: chatId, type } = ctx.chat;
 
-  //   if (type !== "private") {
-  //     userState[chatId] = "setgif";
-  //   }
-  // });
-
-  // teleBot.on(":media", (ctx) => {
-  //   console.log(ctx);
-  // });
-
-  teleBot.hears(/\/setgif/, (ctx) => setGifCommand(ctx));
+  teleBot.hears(/\/setgif/, (ctx) => setGifCommand(ctx, true));
+  // @ts-expect-error CTX type invalid
+  teleBot.on(":animation", (ctx) => setGifCommand(ctx));
 
   log("Bot commands up");
 }

@@ -52,7 +52,7 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
     const shortendReceiver = `${receiver.slice(0, 3)}...${receiver.slice(
       receiver.length - 3,
       receiver.length
-    )}`;
+    )}`.replace(/_/g, "_");
     const swapUrl = `${DEX_URL}/swap?chartVisible=true&tt=TON&ft=${symbol}`;
     const chartUrl = `https://www.geckoterminal.com/ton/pools/${address}`;
     let emojiCount = 0;
@@ -77,7 +77,7 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
 
       const greenEmojis = `${emoji || "🟢"}`.repeat(emojiCount);
 
-      const text = `*${cleanedName} Buy!*
+      const text = `[${cleanedName} Buy!](https://t.me/${BOT_USERNAME})
 ${greenEmojis}
 
 💲 *Spent*: ${spentTON} TON \\($${spentUSD}\\)

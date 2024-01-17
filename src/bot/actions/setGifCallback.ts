@@ -7,7 +7,7 @@ export async function setGifCallback(ctx: BotCallbackContextType) {
   if (!isAdmin) return false;
 
   const text =
-    "A GIF can be sent every few interval with a buy message. To set a gif simply post it in the chat with /setgif as its caption.";
+    "A GIF can be sent every few interval with a buy message. To set a gif simply type /setgif in the chat.";
 
   await ctx.editMessageText(text);
   await ctx.editMessageReplyMarkup({
