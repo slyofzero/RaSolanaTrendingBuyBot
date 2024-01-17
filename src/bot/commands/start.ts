@@ -11,7 +11,11 @@ export async function startBot(ctx: BotCommandContextType) {
   let text = `*Welcome to ${BOT_USERNAME}!!!*\n\n`;
 
   if (type === "private") {
-    text += `@${BOT_USERNAME} needs to be added to your project telegram. By adding @${BOT_USERNAME} to your Base Chain project \\(TON\\), you will be able to view the buys, marketcap and transactions real time.\n\nHype your project with a dedicated Base Chain buy bot today!`;
+    text += `What can this bot do?
+
+@${BOT_USERNAME} is to be added to your project telegram. By adding @${BOT_USERNAME} to your project, you will be able to view  the buys, marketcap and transactions real time. Hype your project with a dedicated buy bot today!
+
+◦ /settings : Opens the menu to add a token, gif, telegram group link and adjust any available settings for the buy bot`;
 
     ctx.reply(cleanUpBotMessage(text), { parse_mode: "MarkdownV2" });
   } else {

@@ -91,10 +91,14 @@ ${greenEmojis}
 Powered by @${BOT_USERNAME}`;
 
       if (group.gif) {
-        await teleBot.api.sendVideo(chatId, group.gif);
+        teleBot.api.sendVideo(chatId, group.gif, {
+          caption: cleanUpBotMessage(text),
+          parse_mode: "MarkdownV2",
+        });
+      } else {
+        // @ts-expect-error disable_web_page_preview not in type
+        sendMessage(chatId, text, { disable_web_page_preview: true });
       }
-      // @ts-expect-error disable_web_page_preview not in type
-      await sendMessage(chatId, text, { disable_web_page_preview: true });
     }
 
     return true;
