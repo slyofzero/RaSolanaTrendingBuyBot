@@ -12,4 +12,6 @@ export const {
   DEX_URL,
   TONCLIENT_API_KEY,
   GECKO_API,
+  TRENDING_TOKENS_API,
+  TRENDING_MSG,
 } = process.env;

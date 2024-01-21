@@ -4,12 +4,13 @@ import { cleanUpBotMessage, sendMessage } from "@/utils/bot";
 import { errorHandler, log } from "@/utils/handlers";
 import { client, teleBot } from "..";
 import { sleep } from "@/utils/time";
-import { BOT_USERNAME, DEX_URL, EXPLORER_URL, GECKO_API } from "@/utils/env";
+import { BOT_USERNAME, DEX_URL, EXPLORER_URL, GECKO_API, TRENDING_MSG } from "@/utils/env";
 import { getDocument } from "@/firebase";
 import { StoredGroup, TokenPoolData } from "@/types";
 import { apiFetcher } from "@/utils/api";
 import { Address } from "@ton/ton";
 import { formatNumber } from "@/utils/general";
+import { trendingTokens } from "@/vars/trendingTokens";
 
 export async function scanNewTransfer(newTransfer: NewTransfer) {
   try {
@@ -72,6 +73,9 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       emojiCount = randomizeEmojiCount(70, 100);
     }
 
+    const tokenRank = trendingTokens[jetton];
+    const tokenRankText = tokenRank ? `[TON Trending at #${tokenRank}](${TRENDING_MSG})` : "";
+
     for (const group of groups) {
       const { chatId, emoji } = group;
 
@@ -88,7 +92,8 @@ ${greenEmojis}
 
 [✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [📊 Chart](${chartUrl}) \\| [🔀 Swap](${swapUrl})
 
-Powered by @${BOT_USERNAME}`;
+Powered by @${BOT_USERNAME}
+${tokenRankText}`;
 
       if (group.gif) {
         teleBot.api.sendVideo(chatId, group.gif, {

@@ -67,3 +67,33 @@ interface TokenData {
 export interface TokenPoolData {
   data: TokenData[];
 }
+
+export interface TokenMetaData {
+  data: {
+    id: string;
+    type: string;
+    attributes: {
+      address: string;
+      name: string;
+      symbol: string;
+      coingecko_coin_id: null | string;
+      decimals: number;
+      total_supply: string;
+      price_usd: string;
+      fdv_usd: string;
+      total_reserve_in_usd: string;
+      volume_usd: {
+        h24: string;
+      };
+      market_cap_usd: null | string;
+    };
+    relationships: {
+      top_pools: {
+        data: {
+          id: string;
+          type: string;
+        }[];
+      };
+    };
+  };
+}

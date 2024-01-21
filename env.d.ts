@@ -11,6 +11,8 @@ declare global {
       EXPLORER_URL: string | undefined;
       DEX_URL: string | undefined;
       GECKO_API: string | undefined;
+      TRENDING_TOKENS_API: string | undefined;
+      TRENDING_MSG: string | undefined;
     }
   }
 }
