@@ -20,23 +20,22 @@ export async function setEmojiCommand(ctx: BotCommandContextType) {
   if (!emoji) {
     text = "Missing emoji. To set it do - /setemoji <emoji>";
   } else {
-    const group =
-      ((
-        await getDocument({
+    const groups = (await getDocument({
+      collectionName: "project_groups",
+      queries: [["chatId", "==", String(chatId)]],
+    })) as StoredGroup[];
+
+    for (const group of groups) {
+      if (group && group.id) {
+        await updateDocumentById({
+          id: group.id,
           collectionName: "project_groups",
-          queries: [["chatId", "==", String(chatId)]],
-        })
-      ).at(0) as StoredGroup) || undefined;
+          updates: { emoji: emoji },
+        });
 
-    if (group && group.id) {
-      await updateDocumentById({
-        id: group.id,
-        collectionName: "project_groups",
-        updates: { emoji: emoji },
-      });
-
-      log(`Set emoji ${emoji} for ${chatId}`);
-      text = `New emoji ${emoji} set`;
+        log(`Set emoji ${emoji} for ${chatId}`);
+        text = `New emoji ${emoji} set`;
+      }
     }
   }
 

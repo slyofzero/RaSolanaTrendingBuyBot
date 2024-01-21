@@ -29,21 +29,22 @@ export async function setGifCommand(ctx: HearsContext<Context>, commandCall?: bo
       const isValidMimeType = mime_type?.includes("video") || mime_type?.includes("gif");
 
       if (isValidMimeType) {
-        const group =
-          ((
-            await getDocument({
-              collectionName: "project_groups",
-              queries: [["chatId", "==", String(chatId)]],
-            })
-          ).at(0) as StoredGroup) || undefined;
-        if (group && group.id) {
-          await updateDocumentById({
-            id: group.id,
+        const groups =
+          ((await getDocument({
             collectionName: "project_groups",
-            updates: { gif: gif },
-          });
-          log(`Set GIF added ${gif} for ${chatId}`);
-          text = `New GIF set`;
+            queries: [["chatId", "==", String(chatId)]],
+          })) as StoredGroup[]) || undefined;
+
+        for (const group of groups) {
+          if (group && group.id) {
+            await updateDocumentById({
+              id: group.id,
+              collectionName: "project_groups",
+              updates: { gif: gif },
+            });
+            log(`Set GIF added ${gif} for ${chatId}`);
+            text = `New GIF set`;
+          }
         }
       } else {
         text = "Invalid GIF, try some other one";
