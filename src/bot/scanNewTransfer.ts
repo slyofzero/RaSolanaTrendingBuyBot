@@ -74,7 +74,7 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
     }
 
     const tokenRank = trendingTokens[jetton];
-    const tokenRankText = tokenRank ? `[TON Trending at #${tokenRank}](${TRENDING_MSG})` : "";
+    const tokenRankText = tokenRank ? `\\| [TON Trending at #${tokenRank}](${TRENDING_MSG})` : "";
 
     for (const group of groups) {
       const { chatId, emoji } = group;
@@ -93,7 +93,7 @@ ${greenEmojis}
 [✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [📊 Chart](${chartUrl}) \\| [🔀 Swap](${swapUrl})
 
 Powered by @${BOT_USERNAME}
-${tokenRankText}`;
+@TONTrendingTokensBot ${tokenRankText}`;
 
       if (group.gif) {
         teleBot.api.sendVideo(chatId, group.gif, {
