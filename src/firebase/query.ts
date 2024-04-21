@@ -1,7 +1,7 @@
 import { WhereFilterOp } from "firebase-admin/firestore";
 import { db } from "./config";
 
-const collectionPrefix = "_ton_buy_bot";
+const collectionPrefix = "_ton_test_buy_bot";
 
 interface addDocumentInterface {
   data: object;
@@ -33,10 +33,15 @@ interface updateDocumentByIdInterface {
   collectionName: string;
 }
 
-export const addDocument = async ({ data, collectionName, id }: addDocumentInterface) => {
+export const addDocument = async ({
+  data,
+  collectionName,
+  id,
+}: addDocumentInterface) => {
   collectionName += collectionPrefix;
   const collectionRef = db.collection(collectionName);
-  let docRef: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData> | null = null;
+  let docRef: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData> | null =
+    null;
 
   if (id) {
     docRef = collectionRef.doc(id);
@@ -48,7 +53,10 @@ export const addDocument = async ({ data, collectionName, id }: addDocumentInter
   return docRef;
 };
 
-export const removeDocumentById = async ({ collectionName, id }: removeDocumentInterface) => {
+export const removeDocumentById = async ({
+  collectionName,
+  id,
+}: removeDocumentInterface) => {
   try {
     collectionName += collectionPrefix;
     const collectionRef = db.collection(collectionName);
@@ -73,7 +81,8 @@ export const removeDocument = async ({
 }: getDocumentInterface) => {
   collectionName += collectionPrefix;
   const collectionRef = db.collection(collectionName);
-  let queryRef: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = collectionRef;
+  let queryRef: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> =
+    collectionRef;
 
   if (queries && queries.length > 0) {
     for (const query of queries) {
@@ -96,7 +105,10 @@ export const removeDocument = async ({
   return true;
 };
 
-export const getDocumentById = async ({ collectionName, id }: getDocumentByIdInterface) => {
+export const getDocumentById = async ({
+  collectionName,
+  id,
+}: getDocumentByIdInterface) => {
   collectionName += collectionPrefix;
   const docRef = db.collection(collectionName).doc(id);
   const docSnapshot = await docRef.get();
@@ -116,7 +128,8 @@ export const getDocument = async ({
 }: getDocumentInterface) => {
   collectionName += collectionPrefix;
   const collectionRef = db.collection(collectionName);
-  let queryRef: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = collectionRef;
+  let queryRef: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> =
+    collectionRef;
 
   if (queries && queries.length > 0) {
     for (const query of queries) {

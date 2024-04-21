@@ -4,7 +4,13 @@ import { cleanUpBotMessage, sendMessage } from "@/utils/bot";
 import { errorHandler, log } from "@/utils/handlers";
 import { client, teleBot } from "..";
 import { sleep } from "@/utils/time";
-import { BOT_USERNAME, DEX_URL, EXPLORER_URL, GECKO_API, TRENDING_MSG } from "@/utils/env";
+import {
+  BOT_USERNAME,
+  DEX_URL,
+  EXPLORER_URL,
+  GECKO_API,
+  TRENDING_MSG,
+} from "@/utils/env";
 import { getDocument } from "@/firebase";
 import { StoredGroup, TokenPoolData } from "@/types";
 import { apiFetcher } from "@/utils/api";
@@ -26,7 +32,9 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       return false;
     }
 
-    const { decimals, name, symbol } = (await client.jettons.getJettonInfo(jetton)).metadata;
+    const { decimals, name, symbol } = (
+      await client.jettons.getJettonInfo(jetton)
+    ).metadata;
     const jettonAddress = Address.parseRaw(jetton).toString({ urlSafe: true });
 
     const data = (
@@ -45,11 +53,19 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       address,
     } = data.attributes;
 
-    const receivedAmount = parseFloat((Number(amount) / 10 ** Number(decimals)).toFixed(3));
-    const spentTON = parseFloat((receivedAmount * Number(price_ton)).toFixed(2));
-    const spentUSD = parseFloat((receivedAmount * Number(price_usd)).toFixed(2));
+    const receivedAmount = parseFloat(
+      (Number(amount) / 10 ** Number(decimals)).toFixed(3)
+    );
+    const spentTON = parseFloat(
+      (receivedAmount * Number(price_ton)).toFixed(2)
+    );
+    const spentUSD = parseFloat(
+      (receivedAmount * Number(price_usd)).toFixed(2)
+    );
 
-    const cleanedName = cleanUpBotMessage(name).replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+    const cleanedName = cleanUpBotMessage(name)
+      .replace(/\(/g, "\\(")
+      .replace(/\)/g, "\\)");
     const shortendReceiver = `${receiver.slice(0, 3)}...${receiver.slice(
       receiver.length - 3,
       receiver.length
@@ -74,7 +90,9 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
     }
 
     const tokenRank = trendingTokens[jetton];
-    const tokenRankText = tokenRank ? `\\| [TON Trending at #${tokenRank}](${TRENDING_MSG})` : "";
+    const tokenRankText = tokenRank
+      ? `\\| [TON Trending at #${tokenRank}](${TRENDING_MSG})`
+      : "";
 
     for (const group of groups) {
       const { chatId, emoji } = group;
@@ -88,7 +106,7 @@ ${greenEmojis}
 💰 *Got*: ${receivedAmount.toString()} ${symbol}
 👤 *Buyer*: [${shortendReceiver}](${EXPLORER_URL}/${receiver})
 📊 *MCap*: \\$${formatNumber(market_cap_usd || fdv_usd)}
-🏷 *Price*: \\$${Number(price_usd).toFixed(3)}
+🏷 *Price*: \\$${price_usd}
 
 [✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [📊 Chart](${chartUrl}) \\| [🔀 Swap](${swapUrl})
 
