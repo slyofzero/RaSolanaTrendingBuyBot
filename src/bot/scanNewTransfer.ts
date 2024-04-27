@@ -9,7 +9,6 @@ import {
   DEX_URL,
   EXPLORER_URL,
   GECKO_API,
-  TRENDING_BOT_USERNAME,
   TRENDING_CHANNEL_ID,
   TRENDING_MSG,
 } from "@/utils/env";
@@ -19,12 +18,14 @@ import { apiFetcher } from "@/utils/api";
 import { Address } from "@ton/ton";
 import { formatNumber } from "@/utils/general";
 import { trendingTokens } from "@/vars/trendingTokens";
+import { trendingIcons } from "@/utils/constants";
 
 export async function scanNewTransfer(newTransfer: NewTransfer) {
   const { amount, receiver, hash } = newTransfer;
 
   try {
     const jetton = await getJetton(newTransfer.senderJettonWallet);
+    const friendlyJetton = Address.parse(jetton).toString();
     const groups = (await getDocument({
       collectionName: "project_groups",
       queries: [["jetton", "==", jetton]],
@@ -80,6 +81,7 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
     )}`.replace(/_/g, "_");
     const swapUrl = `${DEX_URL}/swap?chartVisible=true&tt=TON&ft=${symbol}`;
     const chartUrl = `https://www.geckoterminal.com/ton/pools/${address}`;
+    const dexsUrl = `https://dexscreener.com/ton/${friendlyJetton}`;
     let emojiCount = 0;
 
     const randomizeEmojiCount = (min: number, max: number) =>
@@ -97,10 +99,10 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       emojiCount = randomizeEmojiCount(70, 100);
     }
 
-    console.log(tokenRank, jetton);
+    const icon = trendingIcons[tokenRank - 1];
 
     const tokenRankText = tokenRank
-      ? `@${TRENDING_BOT_USERNAME} \\| [TON Trending at #${tokenRank}](${TRENDING_MSG})`
+      ? `[TON Trending at ${icon}](${TRENDING_MSG})`
       : "";
 
     if (tokenRank > 0) {
@@ -115,7 +117,8 @@ ${greenEmojis}
 📊 *MCap*: \\$${formatNumber(market_cap_usd || fdv_usd)}
 🏷 *Price*: \\$${displayTokenPrice}
 
-[✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [📊 Chart](${chartUrl}) \\| [🔀 Swap](${swapUrl})
+[✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [🔀 Swap](${swapUrl})
+[🦅 DexS](${dexsUrl})  \\| [🦎 Gecko](${chartUrl}) 
 
 Powered by @${BOT_USERNAME}
 ${tokenRankText}`;
