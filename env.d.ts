@@ -6,6 +6,7 @@ declare global {
       HTTP_CLIENT: string | undefined;
       WSS_ENDPOINT: string | undefined;
       BOT_USERNAME: string | undefined;
+      TRENDING_BOT_USERNAME: string | undefined;
       TONCLIENT_ENDPOINT: string | undefined;
       TONCLIENT_API_KEY: string | undefined;
       EXPLORER_URL: string | undefined;
@@ -13,6 +14,8 @@ declare global {
       GECKO_API: string | undefined;
       TRENDING_TOKENS_API: string | undefined;
       TRENDING_MSG: string | undefined;
+      TRENDING_AUTH_KEY: string | undefined;
+      TRENDING_CHANNEL_ID: string | undefined;
     }
   }
 }

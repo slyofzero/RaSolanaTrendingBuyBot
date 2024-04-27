@@ -9,6 +9,8 @@ import {
   DEX_URL,
   EXPLORER_URL,
   GECKO_API,
+  TRENDING_BOT_USERNAME,
+  TRENDING_CHANNEL_ID,
   TRENDING_MSG,
 } from "@/utils/env";
 import { getDocument } from "@/firebase";
@@ -19,10 +21,10 @@ import { formatNumber } from "@/utils/general";
 import { trendingTokens } from "@/vars/trendingTokens";
 
 export async function scanNewTransfer(newTransfer: NewTransfer) {
-  try {
-    const { amount, receiver, hash } = newTransfer;
-    const jetton = await getJetton(newTransfer.senderJettonWallet);
+  const { amount, receiver, hash } = newTransfer;
 
+  try {
+    const jetton = await getJetton(newTransfer.senderJettonWallet);
     const groups = (await getDocument({
       collectionName: "project_groups",
       queries: [["jetton", "==", jetton]],
@@ -43,7 +45,10 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       )
     ).data.data.at(0);
 
-    if (!data) return false;
+    if (!data) {
+      log(`No data found for ${jetton}`);
+      return false;
+    }
 
     const {
       base_token_price_usd: price_usd,
@@ -62,6 +67,7 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
     const spentUSD = parseFloat(
       (receivedAmount * Number(price_usd)).toFixed(2)
     );
+    const displayTokenPrice = Number(price_usd).toFixed(6);
 
     const cleanedName = cleanUpBotMessage(name)
       .replace(/\(/g, "\\(")
@@ -89,10 +95,35 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       emojiCount = randomizeEmojiCount(70, 100);
     }
 
-    const tokenRank = trendingTokens[jetton];
+    const tokenRank = trendingTokens.findIndex((token) => token === jetton) + 1;
+    console.log(tokenRank, jetton);
+
     const tokenRankText = tokenRank
-      ? `\\| [TON Trending at #${tokenRank}](${TRENDING_MSG})`
+      ? `@${TRENDING_BOT_USERNAME} \\| [TON Trending at #${tokenRank}](${TRENDING_MSG})`
       : "";
+
+    if (tokenRank > 0) {
+      const greenEmojis = "🟢".repeat(emojiCount);
+
+      const text = `[${cleanedName} Buy!](https://t.me/${BOT_USERNAME})
+${greenEmojis}
+
+💲 *Spent*: ${spentTON} TON \\($${spentUSD}\\)
+💰 *Got*: ${receivedAmount.toString()} ${symbol}
+👤 *Buyer*: [${shortendReceiver}](${EXPLORER_URL}/${receiver})
+📊 *MCap*: \\$${formatNumber(market_cap_usd || fdv_usd)}
+🏷 *Price*: \\$${displayTokenPrice}
+
+[✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [📊 Chart](${chartUrl}) \\| [🔀 Swap](${swapUrl})
+
+Powered by @${BOT_USERNAME}
+${tokenRankText}`;
+
+      sendMessage(TRENDING_CHANNEL_ID || "", text, {
+        // @ts-expect-error disable_web_page_preview not in type
+        disable_web_page_preview: true,
+      });
+    }
 
     for (const group of groups) {
       const { chatId, emoji } = group;
@@ -106,12 +137,12 @@ ${greenEmojis}
 💰 *Got*: ${receivedAmount.toString()} ${symbol}
 👤 *Buyer*: [${shortendReceiver}](${EXPLORER_URL}/${receiver})
 📊 *MCap*: \\$${formatNumber(market_cap_usd || fdv_usd)}
-🏷 *Price*: \\$${price_usd}
+🏷 *Price*: \\$${displayTokenPrice}
 
 [✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [📊 Chart](${chartUrl}) \\| [🔀 Swap](${swapUrl})
 
 Powered by @${BOT_USERNAME}
-@TONTrendingTokensBot ${tokenRankText}`;
+${tokenRankText}`;
 
       if (group.gif) {
         teleBot.api.sendVideo(chatId, group.gif, {

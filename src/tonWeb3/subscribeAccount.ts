@@ -33,12 +33,15 @@ export function subscribeAccount() {
       const { workchain, shard, seqno } = receivedMessage.params;
       const blockId = `(${workchain},${shard},${seqno})`;
 
-      const transactions = await client.blockchain.getBlockchainBlockTransactions(blockId);
+      const transactions =
+        await client.blockchain.getBlockchainBlockTransactions(blockId);
 
       for (const transaction of transactions.transactions) {
         if (transaction) {
           for (const out_msg of transaction.out_msgs) {
-            if (out_msg.decoded_op_name?.trim() === "jetton_internal_transfer") {
+            if (
+              out_msg.decoded_op_name?.trim() === "jetton_internal_transfer"
+            ) {
               const hash = transaction.hash;
 
               const sender = Address.parseRaw(
@@ -51,7 +54,9 @@ export function subscribeAccount() {
               const receiverJettonWallet = Address.parseRaw(
                 out_msg.destination?.address || ""
               ).toString();
-              const senderJettonWallet = Address.parseRaw(out_msg.source?.address || "").toString();
+              const senderJettonWallet = Address.parseRaw(
+                out_msg.source?.address || ""
+              ).toString();
 
               const amount = out_msg.decoded_body?.amount;
               const block = transaction.block;
@@ -69,7 +74,7 @@ export function subscribeAccount() {
                 };
 
                 addNewTransfer(newTransfer);
-                log(`Transaction ${hash} added to new transfers`);
+                // log(`Transaction ${hash} added to new transfers`);
               }
             }
           }
@@ -82,7 +87,9 @@ export function subscribeAccount() {
 
   socket.addEventListener("close", (event) => {
     const { code, reason, wasClean } = event;
-    log(`WebSocket connection closed. Code: ${code}, Reason: ${reason}, Clean: ${wasClean}`);
+    log(
+      `WebSocket connection closed. Code: ${code}, Reason: ${reason}, Clean: ${wasClean}`
+    );
     process.exit(1);
   });
 

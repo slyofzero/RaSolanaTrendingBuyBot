@@ -1,12 +1,17 @@
 import { Bot } from "grammy";
 import { initiateBotCommands, initiateCallbackQueries } from "./bot";
 import { log, stopScript } from "./utils/handlers";
-import { BOT_TOKEN, HTTP_CLIENT, TONCLIENT_API_KEY, TONCLIENT_ENDPOINT } from "./utils/env";
+import {
+  BOT_TOKEN,
+  HTTP_CLIENT,
+  TONCLIENT_API_KEY,
+  TONCLIENT_ENDPOINT,
+} from "./utils/env";
 import { Api, HttpClient } from "tonapi-sdk-js";
 import { TonClient } from "@ton/ton";
 import { subscribeAccount } from "./tonWeb3";
 import { checkNewTransfer } from "./vars/newTransfers";
-import { getTrendingTokens } from "./bot/getTrendingTokens";
+import { syncTrendingTokens } from "./vars/trendingTokens";
 
 if (!BOT_TOKEN) {
   stopScript("BOT_TOKEN is missing.");
@@ -41,8 +46,10 @@ const interval = 20;
   initiateCallbackQueries();
   subscribeAccount();
 
+  await Promise.all([syncTrendingTokens()]);
+
   async function repeatPerMinute() {
-    await getTrendingTokens();
+    await syncTrendingTokens();
     setTimeout(repeatPerMinute, 60 * 1e3);
   }
   await repeatPerMinute();
