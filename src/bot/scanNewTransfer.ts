@@ -30,7 +30,9 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       queries: [["jetton", "==", jetton]],
     })) as StoredGroup[];
 
-    if (!groups.length) {
+    const tokenRank = trendingTokens.findIndex((token) => token === jetton) + 1;
+
+    if (!groups.length && tokenRank === 0) {
       return false;
     }
 
@@ -95,7 +97,6 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       emojiCount = randomizeEmojiCount(70, 100);
     }
 
-    const tokenRank = trendingTokens.findIndex((token) => token === jetton) + 1;
     console.log(tokenRank, jetton);
 
     const tokenRankText = tokenRank
