@@ -46,7 +46,7 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       await apiFetcher<TokenPoolData>(
         `${GECKO_API}/search/pools?query=${jettonAddress}&network=ton&page=1`
       )
-    ).data.data.at(0);
+    ).data.data?.at(0);
 
     if (!data) {
       log(`No data found for ${jetton}`);
@@ -59,6 +59,7 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       fdv_usd,
       market_cap_usd,
       address,
+      reserve_in_usd,
     } = data.attributes;
 
     const receivedAmount = parseFloat(
@@ -100,6 +101,27 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
     }
 
     const icon = trendingIcons[tokenRank - 1];
+    const holdersPromise = client.jettons.getJettonInfo(jetton);
+    const walletBalancePromise =
+      client.accounts.getAccountJettonsBalances(receiver);
+
+    const [holders, balances] = await Promise.all([
+      holdersPromise,
+      walletBalancePromise,
+    ]);
+
+    const tokenBalance =
+      Number(
+        balances.balances.find(({ jetton: token }) => token.address === jetton)
+          ?.balance
+      ) || 0;
+    const adjustedBalance = tokenBalance / 10 ** Number(decimals);
+    const prevBalance = adjustedBalance - receivedAmount;
+    const balanceChange = (receivedAmount / prevBalance) * 100 || 1;
+    const balanceChangeText =
+      prevBalance <= 0 ? "New!!!" : `+${balanceChange.toFixed(0)}%`;
+
+    const holdersUrl = `https://tonviewer.com/${jetton}?section=holders`;
 
     const tokenRankText = tokenRank
       ? `[TON Trending at ${icon}](${TRENDING_MSG})`
@@ -117,9 +139,12 @@ ${greenEmojis}
 👤 *Buyer*: [${shortendReceiver}](${EXPLORER_URL}/${receiver})
 📊 *MCap*: \\$${formatNumber(market_cap_usd || fdv_usd)}
 🏷 *Price*: \\$${displayTokenPrice}
+💧 *Liquidity*: \\${formatNumber(reserve_in_usd)}
+💹 *Position*: ${balanceChangeText}
 
 [✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [🔀 Buy](${swapUrl})
-[🦅 DexS](${dexsUrl})  \\| [🦎 Gecko](${chartUrl}) 
+[🦅 DexS](${dexsUrl})  \\| [🦎 Gecko](${chartUrl})
+[👨 ${holders.holders_count} Holders](${holdersUrl})
 
 Powered by @${BOT_USERNAME} `;
 
@@ -143,9 +168,12 @@ ${greenEmojis}
 👤 *Buyer*: [${shortendReceiver}](${EXPLORER_URL}/${receiver})
 📊 *MCap*: \\$${formatNumber(market_cap_usd || fdv_usd)}
 🏷 *Price*: \\$${displayTokenPrice}
+💧 *Liquidity*: \\${formatNumber(reserve_in_usd)}
+💹 *Position*: ${balanceChangeText}
 
 [✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [🔀 Buy](${swapUrl})
 [🦅 DexS](${dexsUrl})  \\| [🦎 Gecko](${chartUrl}) 
+[👨 ${holders.holders_count} Holders](${holdersUrl})
 
 Powered by @${BOT_USERNAME}
 ${tokenRankText}`;
@@ -162,8 +190,8 @@ ${tokenRankText}`;
   } catch (error) {
     log("Retrying notification");
     errorHandler(error);
-
     await sleep(1500);
+
     return await scanNewTransfer(newTransfer);
   }
 }

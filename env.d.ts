@@ -4,6 +4,7 @@ declare global {
       BOT_TOKEN: string | undefined;
       FIREBASE_KEY: string | undefined;
       HTTP_CLIENT: string | undefined;
+      TON_API_KEY: string | undefined;
       WSS_ENDPOINT: string | undefined;
       BOT_USERNAME: string | undefined;
       TRENDING_BOT_USERNAME: string | undefined;

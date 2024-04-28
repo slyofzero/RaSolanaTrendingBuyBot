@@ -6,6 +6,7 @@ import {
   HTTP_CLIENT,
   TONCLIENT_API_KEY,
   TONCLIENT_ENDPOINT,
+  TON_API_KEY,
 } from "./utils/env";
 import { Api, HttpClient } from "tonapi-sdk-js";
 import { TonClient } from "@ton/ton";
@@ -27,6 +28,12 @@ if (!TONCLIENT_API_KEY) {
 
 const httpClient = new HttpClient({
   baseUrl: HTTP_CLIENT,
+  baseApiParams: {
+    headers: {
+      Authorization: `Bearer ${TON_API_KEY}`,
+      "Content-type": "application/json",
+    },
+  },
 });
 export const client = new Api(httpClient);
 export const teleBot = new Bot(BOT_TOKEN || "");
@@ -44,6 +51,7 @@ const interval = 20;
   log("Telegram bot setup");
   initiateBotCommands();
   initiateCallbackQueries();
+
   subscribeAccount();
 
   await Promise.all([syncTrendingTokens()]);
