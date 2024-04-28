@@ -1,6 +1,6 @@
 import { getJetton } from "@/tonWeb3";
 import { NewTransfer } from "@/types/var";
-import { cleanUpBotMessage, sendMessage } from "@/utils/bot";
+import { cleanUpBotMessage } from "@/utils/bot";
 import { errorHandler, log } from "@/utils/handlers";
 import { client, teleBot } from "..";
 import { sleep } from "@/utils/time";
@@ -18,7 +18,7 @@ import { apiFetcher } from "@/utils/api";
 import { Address } from "@ton/ton";
 import { formatNumber } from "@/utils/general";
 import { trendingTokens } from "@/vars/trendingTokens";
-import { trendingIcons } from "@/utils/constants";
+import { defaultBuyGif, trendingIcons } from "@/utils/constants";
 
 export async function scanNewTransfer(newTransfer: NewTransfer) {
   const { amount, receiver, hash } = newTransfer;
@@ -106,7 +106,34 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       : "";
 
     if (tokenRank > 0) {
-      const greenEmojis = "🟢".repeat(emojiCount);
+      const greenEmojis = "👾".repeat(emojiCount);
+
+      const text = `*${tokenRankText}*
+[${cleanedName} Buy!](https://t.me/${BOT_USERNAME})
+${greenEmojis}
+
+💲 *Spent*: ${spentTON} TON \\($${spentUSD}\\)
+💰 *Got*: ${receivedAmount.toString()} ${symbol}
+👤 *Buyer*: [${shortendReceiver}](${EXPLORER_URL}/${receiver})
+📊 *MCap*: \\$${formatNumber(market_cap_usd || fdv_usd)}
+🏷 *Price*: \\$${displayTokenPrice}
+
+[✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [🔀 Buy](${swapUrl})
+[🦅 DexS](${dexsUrl})  \\| [🦎 Gecko](${chartUrl}) 
+
+Powered by @${BOT_USERNAME} `;
+
+      teleBot.api.sendVideo(TRENDING_CHANNEL_ID || "", defaultBuyGif, {
+        caption: cleanUpBotMessage(text),
+        parse_mode: "MarkdownV2",
+      });
+    }
+
+    for (const group of groups) {
+      const { chatId, emoji, gif } = group;
+
+      const greenEmojis = `${emoji || "👾"}`.repeat(emojiCount);
+      const buyGif = gif || defaultBuyGif;
 
       const text = `[${cleanedName} Buy!](https://t.me/${BOT_USERNAME})
 ${greenEmojis}
@@ -117,46 +144,16 @@ ${greenEmojis}
 📊 *MCap*: \\$${formatNumber(market_cap_usd || fdv_usd)}
 🏷 *Price*: \\$${displayTokenPrice}
 
-[✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [🔀 Swap](${swapUrl})
+[✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [🔀 Buy](${swapUrl})
 [🦅 DexS](${dexsUrl})  \\| [🦎 Gecko](${chartUrl}) 
 
 Powered by @${BOT_USERNAME}
 ${tokenRankText}`;
 
-      sendMessage(TRENDING_CHANNEL_ID || "", text, {
-        // @ts-expect-error disable_web_page_preview not in type
-        disable_web_page_preview: true,
+      teleBot.api.sendVideo(chatId, buyGif, {
+        caption: cleanUpBotMessage(text),
+        parse_mode: "MarkdownV2",
       });
-    }
-
-    for (const group of groups) {
-      const { chatId, emoji } = group;
-
-      const greenEmojis = `${emoji || "🟢"}`.repeat(emojiCount);
-
-      const text = `[${cleanedName} Buy!](https://t.me/${BOT_USERNAME})
-${greenEmojis}
-
-💲 *Spent*: ${spentTON} TON \\($${spentUSD}\\)
-💰 *Got*: ${receivedAmount.toString()} ${symbol}
-👤 *Buyer*: [${shortendReceiver}](${EXPLORER_URL}/${receiver})
-📊 *MCap*: \\$${formatNumber(market_cap_usd || fdv_usd)}
-🏷 *Price*: \\$${displayTokenPrice}
-
-[✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [📊 Chart](${chartUrl}) \\| [🔀 Swap](${swapUrl})
-
-Powered by @${BOT_USERNAME}
-${tokenRankText}`;
-
-      if (group.gif) {
-        teleBot.api.sendVideo(chatId, group.gif, {
-          caption: cleanUpBotMessage(text),
-          parse_mode: "MarkdownV2",
-        });
-      } else {
-        // @ts-expect-error disable_web_page_preview not in type
-        sendMessage(chatId, text, { disable_web_page_preview: true });
-      }
     }
 
     return true;
