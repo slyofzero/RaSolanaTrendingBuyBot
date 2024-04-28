@@ -119,7 +119,7 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
     const prevBalance = adjustedBalance - receivedAmount;
     const balanceChange = (receivedAmount / prevBalance) * 100 || 1;
     const balanceChangeText =
-      prevBalance <= 0 ? "New!!!" : `+${balanceChange.toFixed(0)}%`;
+      prevBalance <= 0 ? "New!!!" : `\\+${balanceChange.toFixed(0)}%`;
 
     const holdersUrl = `https://tonviewer.com/${jetton}?section=holders`;
 
