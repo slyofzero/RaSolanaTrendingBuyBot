@@ -15,8 +15,7 @@ import {
 import { getDocument } from "@/firebase";
 import { StoredGroup, TokenPoolData } from "@/types";
 import { apiFetcher } from "@/utils/api";
-import { Address } from "@ton/ton";
-import { formatNumber } from "@/utils/general";
+import { Address, fromNano } from "@ton/ton";
 import { trendingTokens } from "@/vars/trendingTokens";
 import { defaultBuyGif, trendingIcons } from "@/utils/constants";
 
@@ -104,11 +103,21 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
     const holdersPromise = client.jettons.getJettonInfo(jetton);
     const walletBalancePromise =
       client.accounts.getAccountJettonsBalances(receiver);
+    const walletTonBalancePromise = client.accounts.getAccount(receiver);
 
-    const [holders, balances] = await Promise.all([
+    const [holders, balances, walletBalance] = await Promise.all([
       holdersPromise,
       walletBalancePromise,
+      walletTonBalancePromise,
     ]);
+
+    const walletTonBalance = Number(fromNano(walletBalance.balance)).toFixed(2);
+    const mcap = Number(
+      Number(market_cap_usd || fdv_usd).toFixed(2)
+    ).toLocaleString();
+    const liquidity = Number(
+      Number(reserve_in_usd).toFixed(2)
+    ).toLocaleString();
 
     const tokenBalance =
       Number(
@@ -138,10 +147,11 @@ ${greenEmojis}
 💲 *Spent*: ${spentTON} TON \\($${spentUSD}\\)
 💰 *Got*: ${receivedAmount.toString()} ${symbol}
 👤 *Buyer*: [${shortendReceiver}](${EXPLORER_URL}/${receiver})
-📊 *MCap*: \\$${formatNumber(market_cap_usd || fdv_usd)}
+📊 *MCap*: \\$${mcap}
 🏷 *Price*: \\$${displayTokenPrice}
-💧 *Liquidity*: \\${formatNumber(reserve_in_usd)}
+💧 *Liquidity*: \\$${liquidity}
 💹 *Position*: ${balanceChangeText}
+💵 *Wallet Balance*: ${walletTonBalance} TON
 
 [✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [🔀 Buy](${swapUrl})
 [🦅 DexS](${dexsUrl})  \\| [🦎 Gecko](${chartUrl})
@@ -167,9 +177,9 @@ ${greenEmojis}
 💲 *Spent*: ${spentTON} TON \\($${spentUSD}\\)
 💰 *Got*: ${receivedAmount.toString()} ${symbol}
 👤 *Buyer*: [${shortendReceiver}](${EXPLORER_URL}/${receiver})
-📊 *MCap*: \\$${formatNumber(market_cap_usd || fdv_usd)}
+📊 *MCap*: \\$${mcap}
 🏷 *Price*: \\$${displayTokenPrice}
-💧 *Liquidity*: \\${formatNumber(reserve_in_usd)}
+💧 *Liquidity*: \\${liquidity}
 💹 *Position*: ${balanceChangeText}
 
 [✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [🔀 Buy](${swapUrl})
