@@ -109,6 +109,7 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       const greenEmojis = "👾".repeat(emojiCount);
 
       const text = `*${tokenRankText}*
+
 [${cleanedName} Buy!](https://t.me/${BOT_USERNAME})
 ${greenEmojis}
 
@@ -123,10 +124,12 @@ ${greenEmojis}
 
 Powered by @${BOT_USERNAME} `;
 
-      teleBot.api.sendVideo(TRENDING_CHANNEL_ID || "", defaultBuyGif, {
-        caption: cleanUpBotMessage(text),
-        parse_mode: "MarkdownV2",
-      });
+      teleBot.api
+        .sendVideo(TRENDING_CHANNEL_ID || "", defaultBuyGif, {
+          caption: cleanUpBotMessage(text),
+          parse_mode: "MarkdownV2",
+        })
+        .catch((e) => errorHandler(e));
     }
 
     for (const group of groups) {
@@ -150,10 +153,12 @@ ${greenEmojis}
 Powered by @${BOT_USERNAME}
 ${tokenRankText}`;
 
-      teleBot.api.sendVideo(chatId, buyGif, {
-        caption: cleanUpBotMessage(text),
-        parse_mode: "MarkdownV2",
-      });
+      teleBot.api
+        .sendVideo(chatId, buyGif, {
+          caption: cleanUpBotMessage(text),
+          parse_mode: "MarkdownV2",
+        })
+        .catch((e) => errorHandler(e));
     }
 
     return true;

@@ -74,7 +74,7 @@ export function subscribeAccount() {
                 };
 
                 addNewTransfer(newTransfer);
-                log(`Transaction ${hash} added to new transfers`);
+                // log(`Transaction ${hash} added to new transfers`);
               }
             }
           }
