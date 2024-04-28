@@ -1,6 +1,6 @@
 import { getJetton } from "@/tonWeb3";
 import { NewTransfer } from "@/types/var";
-import { cleanUpBotMessage } from "@/utils/bot";
+import { cleanUpBotMessage, sendMessage } from "@/utils/bot";
 import { errorHandler, log } from "@/utils/handlers";
 import { client, teleBot } from "..";
 import { sleep } from "@/utils/time";
@@ -108,9 +108,8 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
     if (tokenRank > 0) {
       const greenEmojis = "👾".repeat(emojiCount);
 
-      const text = `*${tokenRankText}*
-
-[${cleanedName} Buy!](https://t.me/${BOT_USERNAME})
+      const text = `*${tokenRankText}* \\| [${cleanedName} Buy!](https://t.me/${BOT_USERNAME})
+      
 ${greenEmojis}
 
 💲 *Spent*: ${spentTON} TON \\($${spentUSD}\\)
@@ -124,12 +123,10 @@ ${greenEmojis}
 
 Powered by @${BOT_USERNAME} `;
 
-      teleBot.api
-        .sendVideo(TRENDING_CHANNEL_ID || "", defaultBuyGif, {
-          caption: cleanUpBotMessage(text),
-          parse_mode: "MarkdownV2",
-        })
-        .catch((e) => errorHandler(e));
+      sendMessage(TRENDING_CHANNEL_ID || "", text, {
+        // @ts-expect-error disable_web_page_preview not in type
+        disable_web_page_preview: true,
+      }).catch((e) => errorHandler(e));
     }
 
     for (const group of groups) {
