@@ -190,8 +190,9 @@ ${tokenRankText}`;
   } catch (error) {
     log("Retrying notification");
     errorHandler(error);
-    await sleep(1500);
 
     return await scanNewTransfer(newTransfer);
+  } finally {
+    await sleep(1500);
   }
 }
