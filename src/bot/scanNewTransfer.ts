@@ -116,8 +116,9 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
           ?.balance
       ) || 0;
     const adjustedBalance = tokenBalance / 10 ** Number(decimals);
-    const prevBalance = adjustedBalance - receivedAmount;
-    const balanceChange = (receivedAmount / prevBalance) * 100 || 1;
+    const prevBalance = Number((adjustedBalance - receivedAmount).toFixed(2));
+    const balanceChange =
+      prevBalance > 0 ? (receivedAmount / prevBalance) * 100 : 0;
     const balanceChangeText =
       prevBalance <= 0 ? "New!!!" : `\\+${balanceChange.toFixed(0)}%`;
 
@@ -193,6 +194,6 @@ ${tokenRankText}`;
 
     return await scanNewTransfer(newTransfer);
   } finally {
-    await sleep(1500);
+    await sleep(500);
   }
 }
