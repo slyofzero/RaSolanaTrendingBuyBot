@@ -204,6 +204,6 @@ ${tokenRankText}`;
 
     return await scanNewTransfer(newTransfer);
   } finally {
-    await sleep(500);
+    await sleep(1500);
   }
 }
