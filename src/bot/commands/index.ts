@@ -1,6 +1,6 @@
 import { teleBot } from "@/index";
 import { startBot } from "./start";
-import { log } from "@/utils/handlers";
+import { log, errorHandler } from "@/utils/handlers";
 import { settings } from "./settings";
 import { setEmojiCommand } from "./setEmoji";
 import { stopBot } from "./stop";
