@@ -1,7 +1,7 @@
 import { WhereFilterOp } from "firebase-admin/firestore";
 import { db } from "./config";
 
-const collectionPrefix = "_ton_test_buy_bot";
+const collectionPrefix = "_insect_buy_bot";
 
 interface addDocumentInterface {
   data: object;

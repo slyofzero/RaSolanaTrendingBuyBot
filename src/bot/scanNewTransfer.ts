@@ -18,6 +18,7 @@ import { apiFetcher } from "@/utils/api";
 import { Address, fromNano } from "@ton/ton";
 import { trendingTokens } from "@/vars/trendingTokens";
 import { defaultBuyGif, trendingIcons } from "@/utils/constants";
+import { InlineKeyboard } from "grammy";
 
 export async function scanNewTransfer(newTransfer: NewTransfer) {
   const { amount, receiver, hash } = newTransfer;
@@ -137,6 +138,10 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       ? `[TON Trending at ${icon}](${TRENDING_MSG})`
       : "";
 
+    const keyboard = new InlineKeyboard()
+      .url("Book Trending", `https://t.me/InsectTrendingBot?start=trend`)
+      .url(`Buy ${symbol}`, swapUrl);
+
     if (tokenRank > 0) {
       const greenEmojis = "👾".repeat(emojiCount);
 
@@ -162,6 +167,7 @@ Powered by @${BOT_USERNAME} `;
       sendMessage(TRENDING_CHANNEL_ID || "", text, {
         // @ts-expect-error disable_web_page_preview not in type
         disable_web_page_preview: true,
+        reply_markup: keyboard,
       }).catch((e) => errorHandler(e));
     }
 
@@ -193,6 +199,7 @@ ${tokenRankText}`;
         .sendVideo(chatId, buyGif, {
           caption: cleanUpBotMessage(text),
           parse_mode: "MarkdownV2",
+          reply_markup: keyboard,
         })
         .catch((e) => errorHandler(e));
     }
