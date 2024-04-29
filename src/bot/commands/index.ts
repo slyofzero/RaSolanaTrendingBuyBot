@@ -7,13 +7,15 @@ import { stopBot } from "./stop";
 import { setGifCommand } from "./setGif";
 
 export function initiateBotCommands() {
-  teleBot.api.setMyCommands([
-    { command: "start", description: "Start the bot" },
-    { command: "stop", description: "Stop the bot" },
-    { command: "settings", description: "To customize the bot" },
-    { command: "setemoji", description: "To set an emoji" },
-    { command: "setgif", description: "To set a GIF" },
-  ]);
+  teleBot.api
+    .setMyCommands([
+      { command: "start", description: "Start the bot" },
+      { command: "stop", description: "Stop the bot" },
+      { command: "settings", description: "To customize the bot" },
+      { command: "setemoji", description: "To set an emoji" },
+      { command: "setgif", description: "To set a GIF" },
+    ])
+    .catch((e) => errorHandler(e));
 
   teleBot.command("start", (ctx) => startBot(ctx));
   teleBot.command("stop", (ctx) => stopBot(ctx));
