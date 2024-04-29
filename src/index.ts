@@ -4,6 +4,7 @@ import { log, stopScript } from "./utils/handlers";
 import {
   BOT_TOKEN,
   HTTP_CLIENT,
+  PORT,
   TONCLIENT_API_KEY,
   TONCLIENT_ENDPOINT,
   TON_API_KEY,
@@ -13,6 +14,9 @@ import { TonClient } from "@ton/ton";
 import { subscribeAccount } from "./tonWeb3";
 import { checkNewTransfer } from "./vars/newTransfers";
 import { syncTrendingTokens } from "./vars/trendingTokens";
+import express, { Request, Response } from "express";
+import { syncToTrend, toTrendTokens } from "./vars/trending";
+import { advertisements, syncAdvertisements } from "./vars/advertisements";
 
 if (!BOT_TOKEN) {
   stopScript("BOT_TOKEN is missing.");
@@ -46,6 +50,9 @@ log("Bot instance ready");
 // Check for new transfers at every 20 seconds
 const interval = 20;
 
+const app = express();
+log("Express server ready");
+
 (async function () {
   teleBot.start();
   log("Telegram bot setup");
@@ -54,7 +61,11 @@ const interval = 20;
 
   subscribeAccount();
 
-  await Promise.all([syncTrendingTokens()]);
+  await Promise.all([
+    syncTrendingTokens(),
+    syncToTrend(),
+    syncAdvertisements(),
+  ]);
 
   async function repeatPerMinute() {
     await syncTrendingTokens();
@@ -67,4 +78,25 @@ const interval = 20;
     setTimeout(toRepeat, interval * 1e3);
   }
   await toRepeat();
+
+  // Server
+  app.use(express.json());
+
+  app.get("/ping", (req: Request, res: Response) => {
+    return res.json({ message: "Server is up" });
+  });
+
+  app.post("/syncTrending", async (req: Request, res: Response) => {
+    await syncToTrend();
+    return res.status(200).json({ toTrendTokens });
+  });
+
+  app.post("/syncAdvertisements", async (req: Request, res: Response) => {
+    await syncAdvertisements();
+    return res.status(200).json({ advertisements });
+  });
+
+  app.listen(PORT, () => {
+    log(`Server is running on port ${PORT}`);
+  });
 })();

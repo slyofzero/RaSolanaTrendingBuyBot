@@ -1,4 +1,4 @@
-export const firebaseCollectionPrefix = "_ton_sniper_bot";
+export const firebaseCollectionPrefix = "_insect_buy_bot";
 
 export const defaultBuyGif =
   "BAACAgUAAx0Ef6pfowACL0RmLjjEQ8k-j8XrmlfbFxD9zhKEbgACtA4AAo5ZcFWQUmJZiWQE0DQE";

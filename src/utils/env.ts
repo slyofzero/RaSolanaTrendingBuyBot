@@ -18,4 +18,5 @@ export const {
   TRENDING_BOT_USERNAME,
   TRENDING_CHANNEL_ID,
   TON_API_KEY,
+  PORT,
 } = process.env;

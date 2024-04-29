@@ -17,6 +17,7 @@ declare global {
       TRENDING_MSG: string | undefined;
       TRENDING_AUTH_KEY: string | undefined;
       TRENDING_CHANNEL_ID: string | undefined;
+      PORT: string | undefined;
     }
   }
 }

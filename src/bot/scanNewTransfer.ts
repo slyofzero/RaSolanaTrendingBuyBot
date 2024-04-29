@@ -9,6 +9,7 @@ import {
   DEX_URL,
   EXPLORER_URL,
   GECKO_API,
+  TRENDING_BOT_USERNAME,
   TRENDING_CHANNEL_ID,
   TRENDING_MSG,
 } from "@/utils/env";
@@ -19,6 +20,8 @@ import { Address, fromNano } from "@ton/ton";
 import { trendingTokens } from "@/vars/trendingTokens";
 import { defaultBuyGif, trendingIcons } from "@/utils/constants";
 import { InlineKeyboard } from "grammy";
+import { toTrendTokens } from "@/vars/trending";
+import { advertisements } from "@/vars/advertisements";
 
 export async function scanNewTransfer(newTransfer: NewTransfer) {
   const { amount, receiver, hash } = newTransfer;
@@ -142,8 +145,16 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       .url("Book Trending", `https://t.me/InsectTrendingBot?start=trend`)
       .url(`Buy ${symbol}`, swapUrl);
 
+    const toTrendData = toTrendTokens.find(
+      ({ token }) => Address.parse(token).toRawString() === jetton
+    );
+    const activeAd = advertisements.find(({ status }) => status === "PAID");
+    const adText = activeAd
+      ? `Ad: [${activeAd.text}](${activeAd.link})`
+      : `Ad: [Place your advertisement here](https://t.me/${TRENDING_BOT_USERNAME})?start=adBuyRequest`;
+
     if (tokenRank > 0) {
-      const greenEmojis = "👾".repeat(emojiCount);
+      const greenEmojis = `${toTrendData?.emoji || "👾"}`.repeat(emojiCount);
 
       const text = `*${tokenRankText}* \\| [${cleanedName} Buy!](https://t.me/${BOT_USERNAME})
       
@@ -162,13 +173,25 @@ ${greenEmojis}
 [🦅 DexS](${dexsUrl})  \\| [🦎 Gecko](${chartUrl})
 [👨 ${holders.holders_count} Holders](${holdersUrl})
 
-Powered by @${BOT_USERNAME} `;
+${adText}
 
-      sendMessage(TRENDING_CHANNEL_ID || "", text, {
-        // @ts-expect-error disable_web_page_preview not in type
-        disable_web_page_preview: true,
-        reply_markup: keyboard,
-      }).catch((e) => errorHandler(e));
+Powered by @${BOT_USERNAME}`;
+
+      if (toTrendData?.gif) {
+        teleBot.api
+          .sendVideo(TRENDING_CHANNEL_ID || "", toTrendData?.gif, {
+            caption: cleanUpBotMessage(text),
+            parse_mode: "MarkdownV2",
+            reply_markup: keyboard,
+          })
+          .catch((e) => errorHandler(e));
+      } else {
+        sendMessage(TRENDING_CHANNEL_ID || "", text, {
+          // @ts-expect-error disable_web_page_preview not in type
+          disable_web_page_preview: true,
+          reply_markup: keyboard,
+        }).catch((e) => errorHandler(e));
+      }
     }
 
     for (const group of groups) {
@@ -191,6 +214,8 @@ ${greenEmojis}
 [✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [🔀 Buy](${swapUrl})
 [🦅 DexS](${dexsUrl})  \\| [🦎 Gecko](${chartUrl}) 
 [👨 ${holders.holders_count} Holders](${holdersUrl})
+
+${adText}
 
 Powered by @${BOT_USERNAME}
 ${tokenRankText}`;
