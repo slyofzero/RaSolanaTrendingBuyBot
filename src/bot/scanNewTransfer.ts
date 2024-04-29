@@ -173,25 +173,31 @@ ${greenEmojis}
 [🦅 DexS](${dexsUrl})  \\| [🦎 Gecko](${chartUrl})
 [👨 ${holders.holders_count} Holders](${holdersUrl})
 
-${adText}
+_*${adText}*_
 
 Powered by @${BOT_USERNAME}`;
 
-      if (toTrendData?.gif) {
-        teleBot.api
-          .sendVideo(TRENDING_CHANNEL_ID || "", toTrendData?.gif, {
-            caption: cleanUpBotMessage(text),
-            parse_mode: "MarkdownV2",
-            reply_markup: keyboard,
-          })
-          .catch((e) => errorHandler(e));
-      } else {
-        sendMessage(TRENDING_CHANNEL_ID || "", text, {
-          // @ts-expect-error disable_web_page_preview not in type
-          disable_web_page_preview: true,
-          reply_markup: keyboard,
-        }).catch((e) => errorHandler(e));
-      }
+      sendMessage(TRENDING_CHANNEL_ID || "", text, {
+        // @ts-expect-error disable_web_page_preview not in type
+        disable_web_page_preview: true,
+        reply_markup: keyboard,
+      }).catch((e) => errorHandler(e));
+
+      // if (toTrendData?.gif) {
+      //   teleBot.api
+      //     .sendVideo(TRENDING_CHANNEL_ID || "", toTrendData?.gif, {
+      //       caption: cleanUpBotMessage(text),
+      //       parse_mode: "MarkdownV2",
+      //       reply_markup: keyboard,
+      //     })
+      //     .catch((e) => errorHandler(e));
+      // } else {
+      //   sendMessage(TRENDING_CHANNEL_ID || "", text, {
+      //     // @ts-expect-error disable_web_page_preview not in type
+      //     disable_web_page_preview: true,
+      //     reply_markup: keyboard,
+      //   }).catch((e) => errorHandler(e));
+      // }
     }
 
     for (const group of groups) {
