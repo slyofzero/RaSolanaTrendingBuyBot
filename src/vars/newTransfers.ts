@@ -9,7 +9,7 @@ export function addNewTransfer(newTransfer: NewTransfer) {
 }
 
 export async function checkNewTransfer() {
-  log("Checking for new transfers");
+  log(`Checking for new transfers, got - ${newTransfers.length}`);
 
   for (const [index, transfer] of newTransfers.entries()) {
     const parsed = await scanNewTransfer(transfer);

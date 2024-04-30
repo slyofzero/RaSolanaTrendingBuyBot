@@ -4,8 +4,12 @@ import { log } from "@/utils/handlers";
 import { Context, HearsContext } from "grammy";
 import { userState } from "@/vars/userState";
 import { onlyAdmin } from "../utils";
+import { syncProjectGroups } from "@/vars/projectGroups";
 
-export async function setGifCommand(ctx: HearsContext<Context>, commandCall?: boolean) {
+export async function setGifCommand(
+  ctx: HearsContext<Context>,
+  commandCall?: boolean
+) {
   const { id: chatId, type } = ctx.chat;
   const { message, channel_post } = ctx.update;
   const { animation, video } = message || channel_post;
@@ -26,7 +30,8 @@ export async function setGifCommand(ctx: HearsContext<Context>, commandCall?: bo
   if (userStateValue === "setgif") {
     if (videoSource) {
       const { file_id: gif, mime_type } = videoSource;
-      const isValidMimeType = mime_type?.includes("video") || mime_type?.includes("gif");
+      const isValidMimeType =
+        mime_type?.includes("video") || mime_type?.includes("gif");
 
       if (isValidMimeType) {
         const groups =
@@ -43,6 +48,7 @@ export async function setGifCommand(ctx: HearsContext<Context>, commandCall?: bo
               updates: { gif: gif },
             });
             log(`Set GIF added ${gif} for ${chatId}`);
+            syncProjectGroups();
             text = `New GIF set`;
           }
         }

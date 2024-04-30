@@ -17,6 +17,7 @@ import { syncTrendingTokens } from "./vars/trendingTokens";
 import express, { Request, Response } from "express";
 import { syncToTrend, toTrendTokens } from "./vars/trending";
 import { advertisements, syncAdvertisements } from "./vars/advertisements";
+import { syncProjectGroups } from "./vars/projectGroups";
 
 if (!BOT_TOKEN) {
   stopScript("BOT_TOKEN is missing.");
@@ -65,6 +66,7 @@ log("Express server ready");
     syncTrendingTokens(),
     syncToTrend(),
     syncAdvertisements(),
+    syncProjectGroups(),
   ]);
 
   async function repeatPerMinute() {

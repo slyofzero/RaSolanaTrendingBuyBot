@@ -3,6 +3,7 @@ import { InlineKeyboard } from "grammy";
 import { onlyAdmin } from "../utils";
 import { getDocument, updateDocumentById } from "@/firebase";
 import { log } from "@/utils/handlers";
+import { syncProjectGroups } from "@/vars/projectGroups";
 
 export async function removeGifCallback(ctx: BotCallbackContextType) {
   const isAdmin = await onlyAdmin(ctx);
@@ -29,6 +30,7 @@ export async function removeGifCallback(ctx: BotCallbackContextType) {
         });
 
         log(`GIF reset back to null for ${chatId}`);
+        syncProjectGroups();
         text = "Removed the custom GIF";
       } else {
         text = "You don't have a custom GIF set";

@@ -2,6 +2,7 @@ import { getDocument, updateDocumentById } from "@/firebase";
 import { BotCommandContextType, StoredGroup } from "@/types";
 import { log } from "@/utils/handlers";
 import { onlyAdmin } from "../utils";
+import { syncProjectGroups } from "@/vars/projectGroups";
 
 export async function setEmojiCommand(ctx: BotCommandContextType) {
   const { match: emoji } = ctx;
@@ -34,6 +35,7 @@ export async function setEmojiCommand(ctx: BotCommandContextType) {
         });
 
         log(`Set emoji ${emoji} for ${chatId}`);
+        syncProjectGroups();
         text = `New emoji ${emoji} set`;
       }
     }

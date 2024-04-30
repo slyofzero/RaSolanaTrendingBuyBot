@@ -1,6 +1,10 @@
 import { getJetton } from "@/tonWeb3";
 import { NewTransfer } from "@/types/var";
-import { cleanUpBotMessage, sendMessage } from "@/utils/bot";
+import {
+  cleanUpBotMessage,
+  hardCleanUpBotMessage,
+  sendMessage,
+} from "@/utils/bot";
 import { errorHandler, log } from "@/utils/handlers";
 import { client, teleBot } from "..";
 import { sleep } from "@/utils/time";
@@ -13,8 +17,7 @@ import {
   TRENDING_CHANNEL_ID,
   TRENDING_MSG,
 } from "@/utils/env";
-import { getDocument } from "@/firebase";
-import { StoredGroup, TokenPoolData } from "@/types";
+import { TokenPoolData } from "@/types";
 import { apiFetcher } from "@/utils/api";
 import { Address, fromNano } from "@ton/ton";
 import { trendingTokens } from "@/vars/trendingTokens";
@@ -22,6 +25,7 @@ import { defaultBuyGif, trendingIcons } from "@/utils/constants";
 import { InlineKeyboard } from "grammy";
 import { toTrendTokens } from "@/vars/trending";
 import { advertisements } from "@/vars/advertisements";
+import { projectGroups } from "@/vars/projectGroups";
 
 export async function scanNewTransfer(newTransfer: NewTransfer) {
   const { amount, receiver, hash } = newTransfer;
@@ -29,10 +33,9 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
   try {
     const jetton = await getJetton(newTransfer.senderJettonWallet);
     const friendlyJetton = Address.parse(jetton).toString();
-    const groups = (await getDocument({
-      collectionName: "project_groups",
-      queries: [["jetton", "==", jetton]],
-    })) as StoredGroup[];
+    const groups = projectGroups.filter(
+      ({ jetton: token }) => token === jetton
+    );
 
     const tokenRank = trendingTokens.findIndex((token) => token === jetton) + 1;
 
@@ -84,8 +87,12 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       receiver.length
     )}`.replace(/_/g, "_");
     const swapUrl = `${DEX_URL}/swap?chartVisible=true&tt=TON&ft=${symbol}`;
-    const chartUrl = `https://www.geckoterminal.com/ton/pools/${address}`;
-    const dexsUrl = `https://dexscreener.com/ton/${friendlyJetton}`;
+    const chartUrl = `https://www.geckoterminal.com/ton/pools/${hardCleanUpBotMessage(
+      address
+    )}`;
+    const dexsUrl = `https://dexscreener.com/ton/${hardCleanUpBotMessage(
+      friendlyJetton
+    )}`;
     let emojiCount = 0;
 
     const randomizeEmojiCount = (min: number, max: number) =>
@@ -151,7 +158,7 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
     const activeAd = advertisements.find(({ status }) => status === "PAID");
     const adText = activeAd
       ? `Ad: [${activeAd.text}](${activeAd.link})`
-      : `Ad: [Place your advertisement here](https://t.me/${TRENDING_BOT_USERNAME})?start=adBuyRequest`;
+      : `Ad: [Place your advertisement here](https://t.me/${TRENDING_BOT_USERNAME}?start=adBuyRequest)`;
 
     if (tokenRank > 0) {
       const greenEmojis = `${toTrendData?.emoji || "👾"}`.repeat(emojiCount);
@@ -169,7 +176,9 @@ ${greenEmojis}
 💹 *Position*: ${balanceChangeText}
 💵 *Wallet Balance*: ${walletTonBalance} TON
 
-[✨ Tx](${EXPLORER_URL}/transaction/${hash}) \\| [🔀 Buy](${swapUrl})
+[✨ Tx](${EXPLORER_URL}/transaction/${hardCleanUpBotMessage(
+        hash
+      )}) \\| [🔀 Buy](${hardCleanUpBotMessage(swapUrl)})
 [🦅 DexS](${dexsUrl})  \\| [🦎 Gecko](${chartUrl})
 [👨 ${holders.holders_count} Holders](${holdersUrl})
 
@@ -235,13 +244,16 @@ ${tokenRankText}`;
         .catch((e) => errorHandler(e));
     }
 
+    if (groups.length || tokenRank > 0) {
+      await sleep(1500);
+    }
+
     return true;
   } catch (error) {
+    await sleep(1500);
     log("Retrying notification");
     errorHandler(error);
 
     return await scanNewTransfer(newTransfer);
-  } finally {
-    await sleep(1500);
   }
 }

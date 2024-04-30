@@ -4,6 +4,7 @@ import { cleanUpBotMessage } from "@/utils/bot";
 import { BOT_USERNAME } from "@/utils/env";
 import { Address } from "@ton/ton";
 import { onlyAdmin } from "../utils";
+import { syncProjectGroups } from "@/vars/projectGroups";
 
 export async function startBot(ctx: BotCommandContextType) {
   const { match: jetton } = ctx;
@@ -49,9 +50,14 @@ type /settings`;
           });
         } else {
           ctx.reply(cleanUpBotMessage(text), { parse_mode: "MarkdownV2" });
-          const data: StoredGroup = { chatId: String(chatId), jetton: newAddress };
+          const data: StoredGroup = {
+            chatId: String(chatId),
+            jetton: newAddress,
+          };
           addDocument({ data, collectionName: "project_groups" });
         }
+
+        syncProjectGroups();
       } catch (error) {
         ctx.reply("The jetton address you passed was incorrect.");
       }

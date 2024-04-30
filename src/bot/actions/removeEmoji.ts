@@ -3,6 +3,7 @@ import { InlineKeyboard } from "grammy";
 import { onlyAdmin } from "../utils";
 import { getDocument, updateDocumentById } from "@/firebase";
 import { log } from "@/utils/handlers";
+import { syncProjectGroups } from "@/vars/projectGroups";
 
 export async function removeEmojiCallback(ctx: BotCallbackContextType) {
   const isAdmin = await onlyAdmin(ctx);
@@ -29,6 +30,7 @@ export async function removeEmojiCallback(ctx: BotCallbackContextType) {
         });
 
         log(`Emoji reset back to 🟢 for ${chatId}`);
+        syncProjectGroups();
         text = "Emoji reset back to 🟢";
       } else {
         text = "You don't have a custom emoji set";
@@ -36,7 +38,8 @@ export async function removeEmojiCallback(ctx: BotCallbackContextType) {
       ctx.reply(text);
     }
   } else {
-    const text = "Do you want to delete the custom emoji? It will revert back to 🟢.";
+    const text =
+      "Do you want to delete the custom emoji? It will revert back to 🟢.";
 
     await ctx.editMessageText(text);
     await ctx.editMessageReplyMarkup({
