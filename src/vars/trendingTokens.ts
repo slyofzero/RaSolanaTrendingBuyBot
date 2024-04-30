@@ -11,7 +11,7 @@ export async function syncTrendingTokens() {
     return log(`TRENDING_TOKENS_API is undefined`);
   }
 
-  log("Getting trending pairs data");
+  log(`Getting trending pairs data, got ${trendingTokens.length} tokens`);
 
   const { trendingTokens: newTrendingTokens } = (
     await apiFetcher(TRENDING_TOKENS_API || "", {
