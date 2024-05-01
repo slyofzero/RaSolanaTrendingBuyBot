@@ -165,7 +165,7 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
 
       const text = `*${tokenRankText}* \\| [${cleanUpBotMessage(
         cleanedName
-      )} Buy!](https://t.me/${BOT_USERNAME})
+      )} Buy\\!](https://t.me/${BOT_USERNAME})
       
 ${greenEmojis}
 
