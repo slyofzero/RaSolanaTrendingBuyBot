@@ -157,7 +157,7 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
     );
     const activeAd = advertisements.find(({ status }) => status === "PAID");
     const adText = activeAd
-      ? `Ad: [${activeAd.text}](${activeAd.link})`
+      ? `Ad: [${hardCleanUpBotMessage(activeAd.text)}](${activeAd.link})`
       : `Ad: [Place your advertisement here](https://t.me/${TRENDING_BOT_USERNAME}?start=adBuyRequest)`;
 
     if (tokenRank > 0) {

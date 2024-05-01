@@ -12,7 +12,7 @@ export function cleanUpBotMessage(text: string) {
   return text;
 }
 
-export function hardCleanUpBotMessage(text: string) {
+export function hardCleanUpBotMessage(text: any) {
   text = String(text);
   text = text
     .replace(/\./g, "\\.")
@@ -25,6 +25,10 @@ export function hardCleanUpBotMessage(text: string) {
     .replace(/\+/g, "\\+")
     .replace(/!/g, "\\!")
     .replace(/#/g, "\\#")
+    .replace(/>/g, "\\>")
+    .replace(/</g, "\\<")
+    .replace(/{/g, "\\{")
+    .replace(/}/g, "\\}")
     .replace(/\*/g, "\\*");
 
   return text;

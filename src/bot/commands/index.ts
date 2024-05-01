@@ -23,10 +23,8 @@ export function initiateBotCommands() {
   teleBot.command("setemoji", (ctx) => setEmojiCommand(ctx));
 
   teleBot.hears(/\/setgif/, (ctx) => setGifCommand(ctx, true));
-
-  teleBot.on(":animation", (ctx) => {
-    console.log(JSON.stringify(ctx));
-  });
+  // @ts-expect-error CTX type invalid
+  teleBot.on(":animation", (ctx) => setGifCommand(ctx));
 
   log("Bot commands up");
 }
