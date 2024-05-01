@@ -16,16 +16,12 @@ export function cleanUpBotMessage(text: string | number) {
 export function hardCleanUpBotMessage(text: any) {
   text = String(text);
   text = text
-    .replace(/\./g, "\\.")
-    .replace(/-/g, "\\-")
     .replace(/_/g, "\\_")
     .replace(/\|/g, "\\|")
     .replace(/\(/g, "\\(")
     .replace(/\)/g, "\\)")
     .replace(/`/g, "\\`")
     .replace(/\+/g, "\\+")
-    .replace(/!/g, "\\!")
-    .replace(/#/g, "\\#")
     .replace(/>/g, "\\>")
     .replace(/</g, "\\<")
     .replace(/{/g, "\\{")

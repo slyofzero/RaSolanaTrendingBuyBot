@@ -163,22 +163,18 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
     if (tokenRank > 0) {
       const greenEmojis = `${toTrendData?.emoji || "👾"}`.repeat(emojiCount);
 
-      const text = `*${tokenRankText}* \\| [${cleanUpBotMessage(
-        cleanedName
-      )} Buy\\!](https://t.me/${BOT_USERNAME})
+      const text = `*${tokenRankText}* \\| [${cleanedName} Buy!](https://t.me/${BOT_USERNAME})
       
 ${greenEmojis}
 
-💲 *Spent*: ${cleanUpBotMessage(spentTON)} TON \\($${cleanUpBotMessage(
-        spentUSD
-      )}\\)
-💰 *Got*: ${receivedAmount.toString()} ${cleanUpBotMessage(symbol)}
+💲 *Spent*: ${spentTON} TON \\($${spentUSD}\\)
+💰 *Got*: ${receivedAmount.toString()} ${symbol}
 👤 *Buyer*: [${shortendReceiver}](${EXPLORER_URL}/${receiver})
-📊 *MCap*: \\$${cleanUpBotMessage(mcap)}
-🏷 *Price*: \\$${cleanUpBotMessage(displayTokenPrice)}
-💧 *Liquidity*: \\$${cleanUpBotMessage(liquidity)}
-💹 *Position*: ${cleanUpBotMessage(balanceChangeText)}
-💵 *Wallet Balance*: ${cleanUpBotMessage(walletTonBalance)} TON
+📊 *MCap*: \\$${mcap}
+🏷 *Price*: \\$${displayTokenPrice}
+💧 *Liquidity*: \\$${liquidity}
+💹 *Position*: ${balanceChangeText}
+💵 *Wallet Balance*: ${walletTonBalance} TON
 
 [✨ Tx](${EXPLORER_URL}/transaction/${hardCleanUpBotMessage(
         hash
@@ -190,14 +186,11 @@ _*${adText}*_
 
 Powered by @${BOT_USERNAME}`;
 
-      teleBot.api
-        .sendMessage(TRENDING_CHANNEL_ID || "", text, {
-          // @ts-expect-error disable_web_page_preview not in type
-          disable_web_page_preview: true,
-          reply_markup: keyboard,
-          parse_mode: "MarkdownV2",
-        })
-        .catch((e) => errorHandler(e));
+      sendMessage(TRENDING_CHANNEL_ID || "", text, {
+        // @ts-expect-error disable_web_page_preview not in type
+        disable_web_page_preview: true,
+        reply_markup: keyboard,
+      }).catch((e) => errorHandler(e));
 
       // if (toTrendData?.gif) {
       //   teleBot.api
