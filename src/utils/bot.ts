@@ -2,7 +2,8 @@ import { teleBot } from "..";
 import { SendMessagePropsType, SendMessageReturnType } from "@/types";
 import { errorHandler, log } from "./handlers";
 
-export function cleanUpBotMessage(text: string) {
+export function cleanUpBotMessage(text: string | number) {
+  text = String(text);
   text = text
     .replace(/\./g, "\\.")
     .replace(/-/g, "\\-")
