@@ -19,4 +19,5 @@ export const {
   TRENDING_CHANNEL_ID,
   TON_API_KEY,
   PORT,
+  COINGECKO_API_KEY,
 } = process.env;

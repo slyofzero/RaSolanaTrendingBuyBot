@@ -1,6 +1,6 @@
 import { TokenMetaData, TokenPoolData } from "@/types/terminalData";
 import { apiFetcher } from "@/utils/api";
-import { GECKO_API } from "@/utils/env";
+import { COINGECKO_API_KEY, GECKO_API } from "@/utils/env";
 import { log } from "@/utils/handlers";
 import { Address } from "@ton/ton";
 
@@ -8,7 +8,8 @@ export async function scanToken(address: string) {
   const friendlyAddress = Address.parseRaw(address).toString();
   const tokenInfo = (
     await apiFetcher<TokenPoolData>(
-      `${GECKO_API}/networks/ton/tokens/${friendlyAddress}/pools?page=1`
+      `https://pro-api.coingecko.com/api/v3/onchain/networks/ton/tokens/${friendlyAddress}/pools`,
+      { "x-cg-pro-api-key": COINGECKO_API_KEY || "" }
     )
   ).data.data;
 
@@ -23,7 +24,9 @@ export async function scanToken(address: string) {
   }
 
   const metaData = (
-    await apiFetcher<TokenMetaData>(`${GECKO_API}/networks/ton/tokens/${friendlyAddress}`)
+    await apiFetcher<TokenMetaData>(
+      `${GECKO_API}/networks/ton/tokens/${friendlyAddress}`
+    )
   ).data?.data?.attributes;
 
   if (!metaData) {

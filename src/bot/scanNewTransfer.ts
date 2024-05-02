@@ -10,9 +10,9 @@ import { client, teleBot } from "..";
 import { sleep } from "@/utils/time";
 import {
   BOT_USERNAME,
+  COINGECKO_API_KEY,
   DEX_URL,
   EXPLORER_URL,
-  GECKO_API,
   TRENDING_BOT_USERNAME,
   TRENDING_CHANNEL_ID,
   TRENDING_MSG,
@@ -50,7 +50,8 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
 
     const data = (
       await apiFetcher<TokenPoolData>(
-        `${GECKO_API}/search/pools?query=${jettonAddress}&network=ton&page=1`
+        `https://pro-api.coingecko.com/api/v3/onchain/networks/ton/tokens/${jettonAddress}/pools`,
+        { "x-cg-pro-api-key": COINGECKO_API_KEY || "" }
       )
     ).data.data?.at(0);
 
@@ -247,17 +248,10 @@ ${tokenRankText}`;
         })
         .catch((e) => errorHandler(e));
     }
-
-    if (groups.length || tokenRank > 0) {
-      await sleep(1500);
-    }
-
     return true;
   } catch (error) {
-    await sleep(1500);
     log("Retrying notification");
     errorHandler(error);
-
-    return await scanNewTransfer(newTransfer);
+    sleep(1500).then(() => scanNewTransfer(newTransfer));
   }
 }
