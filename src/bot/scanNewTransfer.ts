@@ -86,7 +86,11 @@ export async function scanNewTransfer(newTransfer: NewTransfer) {
       receiver.length - 3,
       receiver.length
     )}`.replace(/_/g, "_");
-    const swapUrl = `${DEX_URL}/swap?chartVisible=true&tt=TON&ft=${symbol}`;
+
+    const swapUrl =
+      data.relationships.dex.data.id === "dedust"
+        ? `https://dedust.io/swap/TON/${symbol}`
+        : `${DEX_URL}/swap?chartVisible=true&tt=TON&ft=${symbol}`;
     const chartUrl = `https://www.geckoterminal.com/ton/pools/${hardCleanUpBotMessage(
       address
     )}`;
