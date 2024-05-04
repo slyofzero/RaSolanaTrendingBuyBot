@@ -19,6 +19,7 @@ import { projectGroups } from "@/vars/projectGroups";
 import { trendingTokens } from "@/vars/trendingTokens";
 import { toTrendTokens } from "@/vars/trending";
 import { advertisements } from "@/vars/advertisements";
+import { InlineKeyboard } from "grammy";
 
 export async function sendAlert(txnData: TxnData) {
   try {
@@ -178,9 +179,9 @@ export async function sendAlert(txnData: TxnData) {
       ? `*[TON Trending at ${icon}](${TRENDING_MSG})* \\| `
       : "";
 
-    //   const keyboard = new InlineKeyboard()
-    //     .url("Book Trending", `https://t.me/InsectTrendingBot?start=trend`)
-    //     .url(`Buy ${symbol}`, swapUrl);
+    const keyboard = new InlineKeyboard()
+      .url("Book Trending", `https://t.me/InsectTonBuyBot?start=trend`)
+      .url(`Buy ${symbol}`, swapUrl);
 
     const toTrendData = toTrendTokens.find(
       ({ token }) => Address.parse(token).toRawString() === jetton
@@ -224,6 +225,7 @@ Powered by @${BOT_USERNAME}`;
         const trendingText = `${tokenRankText}${getBodyText(toTrendData?.emoji || "")}`; // prettier-ignore
         await teleBot.api.sendMessage(TRENDING_CHANNEL_ID || "", trendingText, {
           parse_mode: "MarkdownV2",
+          reply_markup: keyboard,
           // @ts-expect-error disable_web_page_preview not in type
           disable_web_page_preview: true,
         });

@@ -19,6 +19,9 @@ declare global {
       TRENDING_CHANNEL_ID: string | undefined;
       PORT: string | undefined;
       COINGECKO_API_KEY: string | undefined;
+      MAIN_ADDRESS: string | undefined;
+      TRENDING_PRICES: string | undefined;
+      AD_PRICES: string | undefined;
     }
   }
 }

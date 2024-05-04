@@ -17,6 +17,7 @@ import express, { Request, Response } from "express";
 import { syncToTrend, toTrendTokens } from "./vars/trending";
 import { advertisements, syncAdvertisements } from "./vars/advertisements";
 import { syncProjectGroups } from "./vars/projectGroups";
+import { rpcConfig } from "./rpc";
 // import { dedustTransfer } from "./tonWeb3/transferTxn";
 
 if (!BOT_TOKEN) {
@@ -52,6 +53,7 @@ const app = express();
 log("Express server ready");
 
 (async function () {
+  rpcConfig();
   teleBot.start();
   log("Telegram bot setup");
   initiateBotCommands();

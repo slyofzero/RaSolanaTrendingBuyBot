@@ -2,7 +2,7 @@ import { getDocument, updateDocumentById } from "@/firebase";
 import { StoredGroup } from "@/types";
 import { log } from "@/utils/handlers";
 import { Context, HearsContext } from "grammy";
-import { userState } from "@/vars/userState";
+import { userState } from "@/vars/state";
 import { onlyAdmin } from "../utils";
 import { syncProjectGroups } from "@/vars/projectGroups";
 

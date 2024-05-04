@@ -1,4 +1,5 @@
 import { Address } from "@ton/ton";
+import { AD_PRICES, TRENDING_PRICES } from "./env";
 
 export const firebaseCollectionPrefix = "_insect_buy_bot";
 
@@ -40,3 +41,12 @@ export const trendingIcons = [
   "1️⃣9️⃣",
   "2️⃣0️⃣",
 ];
+export const workchain = 0;
+export const avgGasFees = 0.025;
+
+export const trendPrices: { [K in 1 | 2 | 3]: { [key: number]: number } } =
+  JSON.parse(TRENDING_PRICES || "");
+export const adPrices: { [key: number]: number } = JSON.parse(AD_PRICES || "");
+export const urlRegex =
+  /^(?:https?|ftp):\/\/(?:www\.)?[\w-]+\.[a-z]{2,}(?:\/[\w-]*)*\/?(?:\?[^#\s]*)?$/;
+export const transactionValidTime = 25 * 60;

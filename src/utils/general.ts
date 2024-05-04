@@ -1,3 +1,5 @@
+import { urlRegex } from "./constants";
+
 export function formatNumber(num: string | number) {
   num = Number(num);
 
@@ -11,4 +13,18 @@ export function formatNumber(num: string | number) {
   });
 
   return formatter.format(num);
+}
+
+export function isValidUrl(url: string) {
+  return urlRegex.test(url);
+}
+
+export function roundUpToDecimalPlace(
+  number: string | number,
+  decimalPlaces: number
+) {
+  number = Number(number);
+
+  const factor = 10 ** decimalPlaces;
+  return Math.ceil(number * factor) / factor;
 }

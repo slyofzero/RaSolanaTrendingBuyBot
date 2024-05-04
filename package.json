@@ -37,6 +37,7 @@
     "grammy": "^1.22.4",
     "grammy-middlewares": "^1.0.11",
     "moment": "^2.29.4",
+    "nanoid": "3",
     "patch": "^0.0.1",
     "ton-crypto": "^3.2.0",
     "tonapi-sdk-js": "^1.0.1",

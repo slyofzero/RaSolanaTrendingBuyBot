@@ -19,6 +19,12 @@ export async function apiFetcher<T>(
   return { response: response.status, data };
 }
 
+export async function apiPoster<T>(url: string) {
+  const response = await fetch(url, { method: "POST" });
+  const data = (await response.json()) as T;
+  return { response: response.status, data };
+}
+
 export async function downloadFile(url: string, outputPath: string) {
   try {
     const response = await fetch(url);
