@@ -54,6 +54,8 @@ export async function sendAlert(txnData: TxnData) {
       return false;
     }
 
+    log(`Txn ${hash} for ${symbol}`);
+
     const pools = poolsData.map(({ attributes }) =>
       Address.parse(attributes.address).toRawString()
     );
@@ -227,7 +229,7 @@ Powered by @${BOT_USERNAME}`;
         });
       }
     } catch (error) {
-      errorHandler(error, true);
+      errorHandler(error);
     }
 
     // ------------------------------ Custom channel alerts ------------------------------
@@ -243,7 +245,7 @@ Powered by @${BOT_USERNAME}`;
           }
         );
       } catch (error) {
-        errorHandler(error, true);
+        errorHandler(error);
       }
     }
   } catch (error) {
