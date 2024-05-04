@@ -1,7 +1,22 @@
+import { Address } from "@ton/ton";
+
 export const firebaseCollectionPrefix = "_insect_buy_bot";
 
 export const defaultBuyGif =
   "BAACAgUAAx0Ef6pfowACL0RmLjjEQ8k-j8XrmlfbFxD9zhKEbgACtA4AAo5ZcFWQUmJZiWQE0DQE";
+
+export const whitelistedPools = [
+  // "EQBCwe_IObXA4Mt3RbcHil2s4-v4YQS3wUDt1-DvZOceeMGO",
+  // "EQCBwglxhJgTue5tMPX4KE0O1it4dNjD_f53WM8asjgMiSYx",
+  // "EQAoB_Eu83hGRiJ5WFnLn77m98TCNYNfhhE4AUuNNFAzsSkV",
+  // "EQCO9NDT4Il25_4ZpHIOgMAUbRJvpsI9pLzqhD8X7eTVB7X_",
+  "EQAE0eK1xx3CfQIrqxTxLsI0Nd-nKhDBW3cp-mNVZWOn_MT5",
+  "EQDlxf_1othGgTZihxp3CZspogqctK8FEbVIDAa9NmTa7383",
+].map((address) => Address.parse(address).toRawString());
+
+export const bannedTokens = [
+  "0:8cdc1d7640ad5ee326527fc1ad0514f468b30dc84b0173f0e155f451b4e11f7c",
+];
 
 export const trendingIcons = [
   "🥇",

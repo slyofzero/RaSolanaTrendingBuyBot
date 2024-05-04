@@ -12,7 +12,6 @@ import {
 import { Api, HttpClient } from "tonapi-sdk-js";
 import { TonClient } from "@ton/ton";
 import { subscribeAccount } from "./tonWeb3";
-import { checkNewTransfer } from "./vars/newTransfers";
 import { syncTrendingTokens } from "./vars/trendingTokens";
 import express, { Request, Response } from "express";
 import { syncToTrend, toTrendTokens } from "./vars/trending";
@@ -48,9 +47,6 @@ export const tonClient = new TonClient({
 });
 log("Bot instance ready");
 
-// Check for new transfers at every 20 seconds
-const interval = 20;
-
 const app = express();
 log("Express server ready");
 
@@ -68,18 +64,6 @@ log("Express server ready");
     syncAdvertisements(),
     syncProjectGroups(),
   ]);
-
-  async function repeatPerMinute() {
-    await syncTrendingTokens();
-    setTimeout(repeatPerMinute, 60 * 1e3);
-  }
-  await repeatPerMinute();
-
-  async function toRepeat() {
-    await checkNewTransfer();
-    setTimeout(toRepeat, interval * 1e3);
-  }
-  await toRepeat();
 
   // Server
   app.use(express.json());

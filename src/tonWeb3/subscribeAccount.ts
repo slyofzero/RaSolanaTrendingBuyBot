@@ -1,12 +1,8 @@
 import WebSocket from "ws";
-import { NewTransfer } from "@/types/var";
-import { log, stopScript } from "@/utils/handlers";
+import { errorHandler, log, stopScript } from "@/utils/handlers";
 import { WSS_ENDPOINT } from "@/utils/env";
 import { client } from "..";
-import { Address } from "@ton/ton";
-import { addNewTransfer } from "@/vars/newTransfers";
-
-// Configure the HTTP client with your host and token
+import { dedustTransfer, stonfiTransfer } from "./transferTxn";
 
 export function subscribeAccount() {
   if (!WSS_ENDPOINT) {
@@ -36,48 +32,19 @@ export function subscribeAccount() {
       const transactions =
         await client.blockchain.getBlockchainBlockTransactions(blockId);
 
-      for (const transaction of transactions.transactions) {
-        if (transaction) {
-          for (const out_msg of transaction.out_msgs) {
-            if (
-              out_msg.decoded_op_name?.trim() === "jetton_internal_transfer"
-            ) {
-              const hash = transaction.hash;
-
-              const sender = Address.parseRaw(
-                transaction.in_msg?.decoded_body?.response_destination
-              ).toString();
-              const receiver = Address.parseRaw(
-                transaction.in_msg?.decoded_body?.destination
-              ).toString();
-
-              const receiverJettonWallet = Address.parseRaw(
-                out_msg.destination?.address || ""
-              ).toString();
-              const senderJettonWallet = Address.parseRaw(
-                out_msg.source?.address || ""
-              ).toString();
-
-              const amount = out_msg.decoded_body?.amount;
-              const block = transaction.block;
-
-              if (receiverJettonWallet && senderJettonWallet) {
-                const newTransfer: NewTransfer = {
-                  amount,
-                  block,
-                  hash,
-                  parsed: false,
-                  receiver,
-                  receiverJettonWallet,
-                  sender,
-                  senderJettonWallet,
-                };
-
-                addNewTransfer(newTransfer);
-                // log(`Transaction ${hash} added to new transfers`);
-              }
+      for (const txn of transactions.transactions) {
+        try {
+          if (txn) {
+            for (const outMsg of txn.out_msgs) {
+              if (outMsg.decoded_op_name?.trim() === "stonfi_payment_request")
+                stonfiTransfer(txn, outMsg);
+              else if (outMsg.decoded_op_name?.trim() === "dedust_swap")
+                dedustTransfer(txn, outMsg);
             }
           }
+        } catch (error) {
+          errorHandler(error);
+          continue;
         }
       }
     } catch (e) {
