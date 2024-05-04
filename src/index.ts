@@ -17,6 +17,7 @@ import express, { Request, Response } from "express";
 import { syncToTrend, toTrendTokens } from "./vars/trending";
 import { advertisements, syncAdvertisements } from "./vars/advertisements";
 import { syncProjectGroups } from "./vars/projectGroups";
+// import { dedustTransfer } from "./tonWeb3/transferTxn";
 
 if (!BOT_TOKEN) {
   stopScript("BOT_TOKEN is missing.");
@@ -56,14 +57,22 @@ log("Express server ready");
   initiateBotCommands();
   initiateCallbackQueries();
 
-  subscribeAccount();
-
   await Promise.all([
     syncTrendingTokens(),
     syncToTrend(),
     syncAdvertisements(),
     syncProjectGroups(),
   ]);
+
+  subscribeAccount();
+
+  // const txn = await client.blockchain.getBlockchainTransaction(
+  //   "839fbf5b634333e7b3ae2cd22a9544bb9f3d7743f35928e1a677fa2de6693efd"
+  // );
+  // const outMsg = txn.out_msgs.find(
+  //   ({ decoded_op_name }) => decoded_op_name?.trim() === "dedust_swap"
+  // );
+  // if (outMsg) dedustTransfer(txn, outMsg);
 
   // Server
   app.use(express.json());

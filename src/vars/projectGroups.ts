@@ -9,5 +9,5 @@ export async function syncProjectGroups() {
     collectionName: "project_groups",
   });
 
-  log(`Synced project groups`);
+  log(`Synced project groups, ${projectGroups.length}`);
 }

@@ -33,7 +33,6 @@ export function dedustTransfer(txn: Transaction, outMsg: Message) {
     const jetton = Object.values(decodedBody.asset_out?.jetton || {}).join(":");
 
     if (!jetton) return;
-
     const { amount_out } = decodedBody;
     const receiver = decodedBody.field4.sender_addr;
 

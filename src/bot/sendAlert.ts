@@ -1,5 +1,5 @@
 import { TokenPoolData, TxnData } from "@/types";
-import { bannedTokens, whitelistedPools } from "@/utils/constants";
+import { bannedTokens, trendingIcons } from "@/utils/constants";
 import { client, teleBot } from "..";
 import {
   BOT_USERNAME,
@@ -8,24 +8,31 @@ import {
   DEX_URL,
   EXPLORER_URL,
   TRENDING_BOT_USERNAME,
+  TRENDING_MSG,
 } from "@/utils/env";
 import { getJetton } from "@/tonWeb3";
 import { Address, fromNano } from "@ton/ton";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
 import { apiFetcher } from "@/utils/api";
 import { errorHandler, log } from "@/utils/handlers";
+import { projectGroups } from "@/vars/projectGroups";
+import { trendingTokens } from "@/vars/trendingTokens";
+import { toTrendTokens } from "@/vars/trending";
+import { advertisements } from "@/vars/advertisements";
 
 export async function sendAlert(txnData: TxnData) {
   try {
     const { pool, jettonWallet, amountReceived, receiver, hash } = txnData;
 
-    // Don't allow if not whitelisted (testing only)
-    const allowed = whitelistedPools.includes(pool);
-    if (!allowed) return;
-
     // Don't allow if banned
     const jetton = txnData.jetton || (await getJetton(jettonWallet || ""));
-    if (bannedTokens.includes(jetton)) return;
+    const groups = projectGroups.filter(
+      ({ jetton: token }) => token === jetton
+    );
+
+    const tokenRank = trendingTokens.findIndex((token) => token === jetton) + 1;
+    if (bannedTokens.includes(jetton) || (!groups.length && tokenRank === 0))
+      return;
 
     const { decimals, name, symbol } = (
       await client.jettons.getJettonInfo(jetton)
@@ -52,7 +59,7 @@ export async function sendAlert(txnData: TxnData) {
     );
 
     // To make sure that only pools are sending out tokens as only those are buys
-    const txnSenderIsPool = pools.includes(txnData.pool);
+    const txnSenderIsPool = pools.includes(pool);
     if (!txnSenderIsPool) {
       log(`Sender of ${jetton} is not a pool`);
       return false;
@@ -164,31 +171,32 @@ export async function sendAlert(txnData: TxnData) {
 
     const holdersUrl = `https://tonviewer.com/${jetton}?section=holders`;
 
-    //   const tokenRankText = tokenRank
-    //     ? `[TON Trending at ${icon}](${TRENDING_MSG})`
-    //     : "";
+    const icon = trendingIcons[tokenRank - 1];
+    const tokenRankText = tokenRank
+      ? `*[TON Trending at ${icon}](${TRENDING_MSG})* \\| `
+      : "";
 
     //   const keyboard = new InlineKeyboard()
     //     .url("Book Trending", `https://t.me/InsectTrendingBot?start=trend`)
     //     .url(`Buy ${symbol}`, swapUrl);
 
-    //   const toTrendData = toTrendTokens.find(
-    //     ({ token }) => Address.parse(token).toRawString() === jetton
-    //   );
-    //   const activeAd = advertisements.find(({ status }) => status === "PAID");
-    const adText = `Ad: [Place your advertisement here](https://t.me/${TRENDING_BOT_USERNAME}?start=adBuyRequest)`;
-    // activeAd
-    // ? `Ad: [${hardCleanUpBotMessage(activeAd.text)}](${activeAd.link})`
+    const toTrendData = toTrendTokens.find(
+      ({ token }) => Address.parse(token).toRawString() === jetton
+    );
+    const activeAd = advertisements.find(({ status }) => status === "PAID");
+    const adText = activeAd
+      ? `Ad: [${hardCleanUpBotMessage(activeAd.text)}](${activeAd.link})`
+      : `Ad: [Place your advertisement here](https://t.me/${TRENDING_BOT_USERNAME}?start=adBuyRequest)`;
 
-    const greenEmojis = "👾".repeat(emojiCount);
-    // const buyGif = gif || defaultBuyGif;
+    const getBodyText = (emoji: string) => {
+      const greenEmojis = `${emoji || "👾"}`.repeat(emojiCount);
 
-    const text = `[${cleanedName} Buy\\!](https://t.me/${BOT_USERNAME})
+      const text = `[${cleanedName} Buy\\!](https://t.me/${BOT_USERNAME})
 ${greenEmojis}
 
 💲 *Spent*: ${cleanUpBotMessage(spentTON)} TON \\($${cleanUpBotMessage(
-      spentUSD
-    )}\\)
+        spentUSD
+      )}\\)
 💰 *Got*: ${cleanUpBotMessage(receivedAmount)} ${symbol}
 👤 *Buyer*: [${shortendReceiver}](${EXPLORER_URL}/${receiver})
 📊 *MCap*: \\$${mcap}
@@ -201,15 +209,43 @@ ${greenEmojis}
 [🦅 DexS](${dexsUrl})  \\| [🦎 Gecko](${chartUrl}) 
 [👨 ${holders.holders_count} Holders](${holdersUrl})
 
-${adText}
+_*${adText}*_
 
 Powered by @${BOT_USERNAME}`;
 
-    teleBot.api.sendMessage(TRENDING_CHANNEL_ID || "", text, {
-      parse_mode: "MarkdownV2",
-      // @ts-expect-error disable_web_page_preview not in type
-      disable_web_page_preview: true,
-    });
+      return text;
+    };
+
+    // ------------------------------ Trending channel alerts ------------------------------
+    try {
+      if (tokenRank > 0) {
+        const trendingText = `${tokenRankText}${getBodyText(toTrendData?.emoji || "")}`; // prettier-ignore
+        await teleBot.api.sendMessage(TRENDING_CHANNEL_ID || "", trendingText, {
+          parse_mode: "MarkdownV2",
+          // @ts-expect-error disable_web_page_preview not in type
+          disable_web_page_preview: true,
+        });
+      }
+    } catch (error) {
+      errorHandler(error, true);
+    }
+
+    // ------------------------------ Custom channel alerts ------------------------------
+    for (const group of groups) {
+      try {
+        await teleBot.api.sendMessage(
+          group.chatId,
+          getBodyText(group?.emoji || ""),
+          {
+            parse_mode: "MarkdownV2",
+            // @ts-expect-error disable_web_page_preview not in type
+            disable_web_page_preview: true,
+          }
+        );
+      } catch (error) {
+        errorHandler(error, true);
+      }
+    }
   } catch (error) {
     errorHandler(error);
   }

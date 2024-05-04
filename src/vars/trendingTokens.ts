@@ -12,8 +12,6 @@ export async function syncTrendingTokens() {
       return log(`TRENDING_TOKENS_API is undefined`);
     }
 
-    log(`Getting trending pairs data, got ${trendingTokens.length} tokens`);
-
     const { trendingTokens: newTrendingTokens } = (
       await apiFetcher(TRENDING_TOKENS_API || "", {
         Authorization: TRENDING_AUTH_KEY || "",
@@ -21,6 +19,7 @@ export async function syncTrendingTokens() {
     ).data as { trendingTokens: TrendingTokens };
 
     trendingTokens = newTrendingTokens;
+    log(`Getting trending pairs data, got ${trendingTokens.length} tokens`);
   } catch (error) {
     errorHandler(error);
     trendingTokens = [];
