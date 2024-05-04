@@ -15,6 +15,7 @@ import { TokenPoolData } from "@/types/terminalData";
 import { PairsData } from "@/types/pairData";
 import { TOKEN_DATA_URL } from "@/utils/env";
 import { errorHandler } from "@/utils/handlers";
+import { CallbackQuery } from "grammy/types";
 
 export async function trend(ctx: CommandContext<Context>) {
   try {
@@ -60,10 +61,7 @@ export async function addTrendingSocial(ctx: CommandContext<Context>) {
       ({ token: storedToken }) => storedToken === token
     );
     if (storedTokenData) {
-      const { slot } = storedTokenData;
-      return await ctx.reply(
-        `Token ${token} is already trending at rank ${slot}`
-      );
+      return await ctx.reply(`Token ${token} is already trending`);
     }
 
     trendingState[chatId] = { token };
@@ -88,8 +86,11 @@ export async function setTrendingEmoji(ctx: CommandContext<Context>) {
     trendingState[chatId] = { ...trendingState[chatId], social: link };
     delete userState[chatId];
 
+    const keyboard = new InlineKeyboard().text("Keep default", "defaultEmoji");
+
     await ctx.reply(
-      "Send an emoji in the next message, this emoji will be shown in the buybot messages in the trending channel."
+      "Send an emoji in the next message, this emoji will be shown in the buybot messages in the trending channel.",
+      { reply_markup: keyboard }
     );
     userState[chatId] = "trendEmoji";
   } catch (error) {
@@ -97,41 +98,59 @@ export async function setTrendingEmoji(ctx: CommandContext<Context>) {
   }
 }
 
-// export async function setTrendingGif(ctx: CommandContext<Context>) {
-//   const { id: chatId } = ctx.chat;
-//   const emoji = ctx.message?.text || "";
+export async function setTrendingGif(ctx: CommandContext<Context>) {
+  try {
+    const { id: chatId } = ctx.chat;
+    const callbackQuery = ctx.callbackQuery as unknown as
+      | CallbackQuery
+      | undefined;
+    const emoji = callbackQuery?.data ? "" : ctx.message?.text || "";
 
-//   trendingState[chatId] = { ...trendingState[chatId], emoji };
-//   delete userState[chatId];
+    if (callbackQuery?.data) ctx.deleteMessage();
 
-//   await ctx.reply(
-//     "Send a GIF in the next message, this GIF will be shown in the buybot messages in the trending channel."
-//   );
-//   userState[chatId] = "trendGif";
-// }
+    trendingState[chatId] = { ...trendingState[chatId], emoji };
+    delete userState[chatId];
+
+    const keyboard = new InlineKeyboard().text("Keep default", "defaultGif");
+
+    await ctx.reply(
+      "Send a GIF in the next message, this GIF will be shown in the buybot messages in the trending channel.",
+      { reply_markup: keyboard }
+    );
+    userState[chatId] = "trendGif";
+  } catch (error) {
+    errorHandler(error);
+  }
+}
 
 export async function selectTrendingDuration(ctx: CommandContext<Context>) {
   try {
-    // const { id: chatId } = ctx.chat;
-
-    // const { message, channel_post } = ctx.update;
-    // const { animation, video } = message || channel_post;
-    // const videoSource = animation || video;
-
-    // if (!videoSource) return await ctx.reply("Please send a valid GIF or video");
-
-    // const { file_id: gif, mime_type } = videoSource;
-    // const isValidMimeType =
-    //   mime_type?.includes("video") || mime_type?.includes("gif");
-
-    // if (!isValidMimeType) return await ctx.reply("Please send a valid GIF or video");
-
-    // trendingState[chatId] = { ...trendingState[chatId], gif };
-    // delete userState[chatId];
     const { id: chatId } = ctx.chat;
-    const emoji = ctx.message?.text || "";
 
-    trendingState[chatId] = { ...trendingState[chatId], emoji };
+    let gif = "";
+
+    const callbackQuery = ctx.callbackQuery as unknown as
+      | CallbackQuery
+      | undefined;
+    if (!callbackQuery?.data) {
+      const { message, channel_post } = ctx.update;
+      const { animation, video } = message || channel_post;
+      const videoSource = animation || video;
+
+      if (!videoSource)
+        return await ctx.reply("Please send a valid GIF or video");
+
+      const { file_id, mime_type } = videoSource;
+      gif = file_id;
+      const isValidMimeType =
+        mime_type?.includes("video") || mime_type?.includes("gif");
+      if (!isValidMimeType)
+        return await ctx.reply("Please send a valid GIF or video");
+    } else {
+      ctx.deleteMessage();
+    }
+
+    trendingState[chatId] = { ...trendingState[chatId], gif };
     delete userState[chatId];
 
     const text = "Select the duration you want your token to trend for.";

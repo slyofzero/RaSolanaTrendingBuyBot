@@ -222,13 +222,30 @@ Powered by @${BOT_USERNAME}`;
     // ------------------------------ Trending channel alerts ------------------------------
     try {
       if (tokenRank > 0) {
-        const trendingText = `${tokenRankText}${getBodyText(toTrendData?.emoji || "")}`; // prettier-ignore
-        await teleBot.api.sendMessage(TRENDING_CHANNEL_ID || "", trendingText, {
-          parse_mode: "MarkdownV2",
-          reply_markup: keyboard,
-          // @ts-expect-error disable_web_page_preview not in type
-          disable_web_page_preview: true,
-        });
+        const gif = toTrendData?.gif;
+
+        if (gif) {
+          const trendingText = `${tokenRankText}${getBodyText(toTrendData?.emoji || "")}`; // prettier-ignore
+          await teleBot.api.sendVideo(TRENDING_CHANNEL_ID || "", gif, {
+            caption: trendingText,
+            parse_mode: "MarkdownV2",
+            reply_markup: keyboard,
+            // @ts-expect-error disable_web_page_preview not in type
+            disable_web_page_preview: true,
+          });
+        } else {
+          const trendingText = `${tokenRankText}${getBodyText(toTrendData?.emoji || "")}`; // prettier-ignore
+          await teleBot.api.sendMessage(
+            TRENDING_CHANNEL_ID || "",
+            trendingText,
+            {
+              parse_mode: "MarkdownV2",
+              reply_markup: keyboard,
+              // @ts-expect-error disable_web_page_preview not in type
+              disable_web_page_preview: true,
+            }
+          );
+        }
       }
     } catch (error) {
       errorHandler(error);
@@ -236,16 +253,28 @@ Powered by @${BOT_USERNAME}`;
 
     // ------------------------------ Custom channel alerts ------------------------------
     for (const group of groups) {
+      const gif = group?.gif;
+
       try {
-        await teleBot.api.sendMessage(
-          group.chatId,
-          getBodyText(group?.emoji || ""),
-          {
+        if (gif) {
+          await teleBot.api.sendVideo(group.chatId, gif, {
+            caption: getBodyText(group?.emoji || ""),
             parse_mode: "MarkdownV2",
+            reply_markup: keyboard,
             // @ts-expect-error disable_web_page_preview not in type
             disable_web_page_preview: true,
-          }
-        );
+          });
+        } else {
+          await teleBot.api.sendMessage(
+            group.chatId,
+            getBodyText(group?.emoji || ""),
+            {
+              parse_mode: "MarkdownV2",
+              // @ts-expect-error disable_web_page_preview not in type
+              disable_web_page_preview: true,
+            }
+          );
+        }
       } catch (error) {
         errorHandler(error);
       }

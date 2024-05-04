@@ -4,6 +4,7 @@ import {
   prepareTrendingState,
   selectTrendingDuration,
   setTrendingEmoji,
+  setTrendingGif,
 } from "./commands/trend";
 import { userState } from "@/vars/state";
 import { confirmPayment, preparePayment } from "./payment";
@@ -17,10 +18,13 @@ import { log } from "@/utils/handlers";
 const steps: { [key: string]: any } = {
   toTrend: addTrendingSocial,
   trendSocials: setTrendingEmoji,
-  trendEmoji: selectTrendingDuration,
-  // trendGif: selectTrendingDuration,
+  trendEmoji: setTrendingGif,
+  trendGif: selectTrendingDuration,
   trendDuration: prepareTrendingState,
   trendingPayment: confirmPayment,
+
+  defaultEmoji: setTrendingGif,
+  defaultGif: selectTrendingDuration,
 
   advertiseText: advertiseLink,
   advertiseLink: selectAdDuration,

@@ -13,7 +13,7 @@ export async function syncTrendingTokens() {
     }
 
     const { trendingTokens: newTrendingTokens } = (
-      await apiFetcher(TRENDING_TOKENS_API || "", {
+      await apiFetcher(`${TRENDING_TOKENS_API}/trending`, {
         Authorization: TRENDING_AUTH_KEY || "",
       })
     ).data as { trendingTokens: TrendingTokens };

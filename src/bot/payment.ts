@@ -15,7 +15,12 @@ import {
   workchain,
 } from "@/utils/constants";
 import { decrypt, encrypt } from "@/utils/cryptography";
-import { BOT_USERNAME, CHANNEL_ID, TOKEN_DATA_URL } from "@/utils/env";
+import {
+  BOT_USERNAME,
+  CHANNEL_ID,
+  TOKEN_DATA_URL,
+  TRENDING_TOKENS_API,
+} from "@/utils/env";
 import { roundUpToDecimalPlace } from "@/utils/general";
 import { errorHandler, log } from "@/utils/handlers";
 import { getSecondsElapsed, sleep } from "@/utils/time";
@@ -29,7 +34,7 @@ import { customAlphabet } from "nanoid";
 import { tonClient } from "@/rpc";
 import { mnemonicToPrivateKey } from "ton-crypto";
 import { WalletContractV4, fromNano, toNano } from "@ton/ton";
-import { apiFetcher } from "@/utils/api";
+import { apiFetcher, apiPoster } from "@/utils/api";
 import { teleBot } from "..";
 import { TokenPoolData } from "@/types/terminalData";
 
@@ -102,7 +107,6 @@ export async function preparePayment(ctx: CallbackQueryContext<Context>) {
       priceTon = adPrices[duration];
     }
 
-    const slotText = isTrendingPayment ? "trending" : "ad";
     const displaySlot = !isTrendingPayment
       ? slot
       : slot === 1
@@ -111,16 +115,44 @@ export async function preparePayment(ctx: CallbackQueryContext<Context>) {
       ? "3-10"
       : "11-20";
     const paymentCategory = isTrendingPayment ? "trendingPayment" : "adPayment";
-    let text = `You have selected ${slotText} slot ${displaySlot} for ${duration} hours.
-The total cost - \`${roundUpToDecimalPlace(priceTon, 4)}\` TON
 
-Send the bill amount to the below address within 20 minutes, starting from this message generation. Once paid, click on "I have paid" to verify payment. If 20 minutes have already passed then please restart using ${commandToRedo}. 
+    let text = "";
 
-Address - \`${account}\``;
+    if (isTrendingPayment) {
+      const { token, social } = trendingState[chatId];
+      text = `🥇 Trending Fast Track
+
+Token: \`${token}\`
+Link: \`${social}\`
+Trending position: ${displaySlot}
+Length: ${duration} Hours
+Price: ${priceTon} TON
+`;
+    } else {
+      const { text: adText, link } = advertisementState[chatId];
+
+      text = `🧿 Advertisement Buy
+
+Text: \`${adText}\`
+Link: \`${link}\`
+Length: ${duration} Hours
+Price: ${priceTon} TON
+`;
+    }
+
+    text += `
+_*⚠️ Do NOT send from an exchange or Telegram Wallet. Otherwise, potential refunds are forfeited.*_
+
+⬇️ Your Payment Wallet \\(click to copy\\)
+\`${account}\`
+
+You have 20 minutes to complete the transaction and confirm. All funds sent after 20 minutes will be marked invalid.
+
+➡️ Send ${priceTon} TON to the payment wallet and wait for the TXN to confirm on the blockchain. Then click VERIFY TX.`;
 
     text = text.replace(/\./g, "\\.").replace(/-/g, "\\-");
     const keyboard = new InlineKeyboard().text(
-      "I have paid",
+      "VERIFY TX",
       `${paymentCategory}-${hash}`
     );
 
@@ -330,6 +362,16 @@ Ends in: ${duration} Hours
         }
 
         const syncFunc = isTrendingPayment ? syncToTrend : syncAdvertisements;
+
+        if (isTrendingPayment) {
+          apiPoster(`${TRENDING_TOKENS_API}/syncTrending`).catch((e) =>
+            errorHandler(e)
+          );
+        } else {
+          apiPoster(`${TRENDING_TOKENS_API}/syncAdvertisements`).catch((e) =>
+            errorHandler(e)
+          );
+        }
 
         syncFunc()
           .then(() => {

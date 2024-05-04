@@ -124,7 +124,7 @@ export async function sendTransaction(
     log(`Sent ${amount} to ${toAddress}, ${message}`);
     return true;
   } catch (error) {
-    if (retryCount < 5) {
+    if (retryCount < 3) {
       // Check if retry count is less than 5
       errorHandler(error);
       log("Retrying...");

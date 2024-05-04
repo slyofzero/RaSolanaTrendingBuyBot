@@ -8,6 +8,7 @@ import { setGifCommand } from "./setGif";
 import { trend } from "./trend";
 import { advertise } from "./advertise";
 import { executeStep } from "../executeStep";
+import { userState } from "@/vars/state";
 
 export function initiateBotCommands() {
   teleBot.api
@@ -33,8 +34,16 @@ export function initiateBotCommands() {
   teleBot.command("advertise", (ctx) => advertise(ctx));
 
   teleBot.hears(/\/setgif/, (ctx) => setGifCommand(ctx, true));
-  // @ts-expect-error CTX type invalid
-  teleBot.on(":animation", (ctx) => setGifCommand(ctx));
+  teleBot.on(":animation", (ctx) => {
+    const chatId = ctx.chat.id;
+    if (userState[chatId] === "setgif") {
+      // @ts-expect-error CTX type invalid
+      setGifCommand(ctx);
+    } else {
+      // @ts-expect-error CTX type invalid
+      executeStep(ctx);
+    }
+  });
 
   // @ts-expect-error CTX type invalid
   teleBot.on(["message"], (ctx) => executeStep(ctx));
