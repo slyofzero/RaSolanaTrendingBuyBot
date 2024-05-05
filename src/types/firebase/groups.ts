@@ -1,5 +1,5 @@
 export interface StoredGroup {
-  jetton: string;
+  token: string;
   chatId: string;
   id?: string;
   emoji?: string;

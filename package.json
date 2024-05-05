@@ -29,9 +29,13 @@
     "typescript": "^5.3.2"
   },
   "dependencies": {
+    "@metaplex-foundation/js": "^0.20.1",
     "@orbs-network/ton-access": "^2.3.3",
+    "@solana/web3.js": "^1.91.8",
     "@ton/ton": "^13.9.0",
     "dotenv": "^16.3.1",
+    "ethers": "5.7",
+    "express": "^4.19.2",
     "firebase-admin": "^12.0.0",
     "grammy": "^1.22.4",
     "grammy-middlewares": "^1.0.11",
@@ -40,6 +44,7 @@
     "patch": "^0.0.1",
     "ton-crypto": "^3.2.0",
     "tonapi-sdk-js": "^1.0.1",
+    "tweetnacl": "^1.0.3",
     "ws": "^8.16.0"
   }
 }

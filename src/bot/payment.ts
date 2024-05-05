@@ -4,23 +4,19 @@ import {
   getDocumentById,
   updateDocumentById,
 } from "@/firebase";
-import { PairsData, StoredAdvertisement } from "@/types";
+import { StoredAdvertisement } from "@/types";
 import { StoredAccount } from "@/types/accounts";
 import { StoredToTrend } from "@/types/trending";
-import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
+import { apiFetcher } from "@/utils/api";
+import { cleanUpBotMessage } from "@/utils/bot";
 import {
   adPrices,
+  ethPriceApi,
   transactionValidTime,
   trendPrices,
-  workchain,
 } from "@/utils/constants";
 import { decrypt, encrypt } from "@/utils/cryptography";
-import {
-  BOT_USERNAME,
-  CHANNEL_ID,
-  TOKEN_DATA_URL,
-  TRENDING_TOKENS_API,
-} from "@/utils/env";
+import { BOT_USERNAME } from "@/utils/env";
 import { roundUpToDecimalPlace } from "@/utils/general";
 import { errorHandler, log } from "@/utils/handlers";
 import { getSecondsElapsed, sleep } from "@/utils/time";
@@ -31,12 +27,8 @@ import { syncToTrend } from "@/vars/trending";
 import { Timestamp } from "firebase-admin/firestore";
 import { CallbackQueryContext, Context, InlineKeyboard } from "grammy";
 import { customAlphabet } from "nanoid";
-import { tonClient } from "@/rpc";
-import { mnemonicToPrivateKey } from "ton-crypto";
-import { WalletContractV4, fromNano, toNano } from "@ton/ton";
-import { apiFetcher, apiPoster } from "@/utils/api";
-import { teleBot } from "..";
-import { TokenPoolData } from "@/types/terminalData";
+import web3, { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { solanaConnection } from "@/rpc/config";
 
 const alphabet =
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -62,12 +54,12 @@ export async function getUnlockedAccount() {
       updates: { locked: true, lockedAt: Timestamp.now() },
     });
   } else {
-    const newAccount = await generateAccount();
+    const newAccount = generateAccount();
     publicKey = newAccount.publicKey;
 
     const newAccountData: StoredAccount = {
       publicKey,
-      secretKey: encrypt(JSON.stringify(newAccount.secretKey)),
+      secretKey: encrypt(newAccount.secretKey),
       locked: true,
       lockedAt: Timestamp.now(),
     };
@@ -79,19 +71,21 @@ export async function getUnlockedAccount() {
 }
 
 export async function preparePayment(ctx: CallbackQueryContext<Context>) {
-  // @ts-expect-error temp
-  const chatId = ctx.chat?.id;
+  // @ts-expect-error weird
+  const chatId = ctx.chat?.id as unknown as number | undefined;
   const username = ctx.from.username;
   if (!chatId || !username)
     return ctx.reply("Please restart the bot interaction again");
 
   const isTrendingPayment = Boolean(trendingState[chatId]);
   const commandToRedo = isTrendingPayment ? `/trend` : `/advertise`;
+  const callbackReplace = isTrendingPayment ? `trendSlot` : `adSlot`;
 
   try {
     ctx.deleteMessage();
-    const slot =
-      trendingState[chatId]?.slot || advertisementState[chatId]?.slot;
+    const slot = Number(
+      ctx.callbackQuery.data.replace(`${callbackReplace}-`, "")
+    );
     const account = await getUnlockedAccount();
     const hash = nanoid(10);
 
@@ -100,59 +94,28 @@ export async function preparePayment(ctx: CallbackQueryContext<Context>) {
       return ctx.reply(`Please do ${commandToRedo} again`);
 
     // ------------------------------ Calculating prices based on trend or ad buy ------------------------------
-    let priceTon = 0;
+    let priceUsd = 0;
     if (isTrendingPayment) {
-      priceTon = trendPrices[slot as 1 | 2 | 3][duration];
+      priceUsd = trendPrices[duration][slot - 1];
     } else {
-      priceTon = adPrices[duration];
+      priceUsd = adPrices[duration];
     }
 
-    const displaySlot = !isTrendingPayment
-      ? slot
-      : slot === 1
-      ? "1-3"
-      : slot === 2
-      ? "3-10"
-      : "11-20";
+    const ethPrice = (await apiFetcher<any>(ethPriceApi)).data.price;
+    const priceSol = parseFloat((priceUsd / ethPrice).toFixed(8));
+
+    const slotText = isTrendingPayment ? "trending" : "ad";
     const paymentCategory = isTrendingPayment ? "trendingPayment" : "adPayment";
+    let text = `You have selected ${slotText} slot ${slot} for ${duration} hours.
+The total cost - \`${roundUpToDecimalPlace(priceSol, 4)}\` SOL
 
-    let text = "";
+Send the bill amount to the below address within 20 minutes, starting from this message generation. Once paid, click on "I have paid" to verify payment. If 20 minutes have already passed then please restart using ${commandToRedo}. 
 
-    if (isTrendingPayment) {
-      const { token, social } = trendingState[chatId];
-      text = `🥇 Trending Fast Track
-
-Token: \`${token}\`
-Link: \`${social}\`
-Trending position: ${displaySlot}
-Length: ${duration} Hours
-Price: ${priceTon} TON
-`;
-    } else {
-      const { text: adText, link } = advertisementState[chatId];
-
-      text = `🧿 Advertisement Buy
-
-Text: \`${adText}\`
-Link: \`${link}\`
-Length: ${duration} Hours
-Price: ${priceTon} TON
-`;
-    }
-
-    text += `
-_*⚠️ Do NOT send from an exchange or Telegram Wallet. Otherwise, potential refunds are forfeited.*_
-
-⬇️ Your Payment Wallet \\(click to copy\\)
-\`${account}\`
-
-You have 20 minutes to complete the transaction and confirm. All funds sent after 20 minutes will be marked invalid.
-
-➡️ Send ${priceTon} TON to the payment wallet and wait for the TXN to confirm on the blockchain. Then click VERIFY TX.`;
+Address - \`${account}\``;
 
     text = text.replace(/\./g, "\\.").replace(/-/g, "\\-");
     const keyboard = new InlineKeyboard().text(
-      "VERIFY TX",
+      "I have paid",
       `${paymentCategory}-${hash}`
     );
 
@@ -162,7 +125,7 @@ You have 20 minutes to complete the transaction and confirm. All funds sent afte
     let dataToAdd: StoredToTrend | StoredAdvertisement = {
       paidAt: Timestamp.now(),
       sentTo: account,
-      amount: priceTon,
+      amount: priceSol * LAMPORTS_PER_SOL,
       slot: slot,
       duration: duration,
       hash,
@@ -172,14 +135,11 @@ You have 20 minutes to complete the transaction and confirm. All funds sent afte
     } as StoredToTrend | StoredAdvertisement;
 
     if (isTrendingPayment) {
-      const { token, social, gif, emoji } = trendingState[chatId];
+      const { token } = trendingState[chatId];
       dataToAdd = {
         ...dataToAdd,
         // @ts-expect-error weird
         token: token || "",
-        socials: social || "",
-        gif: gif || "",
-        emoji: emoji || "",
       };
     } else {
       const { text, link } = advertisementState[chatId];
@@ -238,9 +198,7 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
       );
     }
 
-    const { paidAt, sentTo, amount, duration, slot, token, socials } =
-      trendingPayment;
-    const paymentAmount = toNano(amount);
+    const { paidAt, sentTo, amount, duration, slot } = trendingPayment;
     const timeSpent = getSecondsElapsed(paidAt.seconds);
 
     if (timeSpent > transactionValidTime) {
@@ -260,21 +218,21 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
     if (!storedAccount) {
       log(`Account for payment hash ${hash} not found`);
       const text = `The account your payment was sent to wasn't found. Please contact the admins and provide them the hash - \`${hash}\`.`;
-
+      // teleBot.api
+      //   .sendMessage(LOGS_CHANNEL_ID || "", cleanUpBotMessage(text), {
+      //     parse_mode: "MarkdownV2",
+      //   })
+      //   .catch((e) => errorHandler(e));
       return await ctx.reply(cleanUpBotMessage(text), {
         parse_mode: "MarkdownV2",
       });
     }
 
     const { secretKey: encryptedSecretKey } = storedAccount;
-    const decryptedMnemonic: string[] = JSON.parse(decrypt(encryptedSecretKey));
-
-    const keypair = await mnemonicToPrivateKey(decryptedMnemonic);
-    const wallet = WalletContractV4.create({
-      workchain,
-      publicKey: keypair.publicKey,
-    });
-    const walletContract = tonClient.open(wallet);
+    const secretKey = decrypt(encryptedSecretKey);
+    const account = web3.Keypair.fromSecretKey(
+      new Uint8Array(JSON.parse(secretKey))
+    );
 
     attemptsCheck: for (const attempt_number of Array.from(Array(20).keys())) {
       try {
@@ -283,21 +241,25 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
         );
 
         // Checking if payment was made
-        const balance = await walletContract.getBalance();
-        const balanceTon = Number(Number(fromNano(balance)).toFixed(2));
-        const paymentTon = Number(Number(fromNano(paymentAmount)).toFixed(2));
+        const balance = await solanaConnection.getBalance(account.publicKey);
 
-        if (balanceTon < paymentTon) {
+        if (balance < amount) {
           log(`Transaction amount doesn't match`);
           await sleep(30000);
           continue attemptsCheck;
         }
 
-        const logText = `${BOT_USERNAME} transaction ${hash} for ${collectionName} verified with payment of ${amount} TON.\nSlot ${slot}, duration ${duration} hours`;
+        const amountSol = (amount / LAMPORTS_PER_SOL).toFixed(3);
+
+        const logText = `${BOT_USERNAME} transaction ${hash} for ${collectionName} verified with payment of ${amountSol} SOL.\nSlot ${slot}, duration ${duration} hours`;
         log(logText);
         const currentTimestamp = Timestamp.now();
 
-        await updateDocumentById({
+        // teleBot.api
+        //   .sendMessage(PAYMENT_LOGS_CHANNEL_ID || "", logText)
+        //   .catch((e) => errorHandler(e));
+
+        updateDocumentById({
           updates: {
             status: "PAID",
             paidAt: currentTimestamp,
@@ -311,67 +273,13 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
         });
 
         const confirmationText = `You have purchased a trending slot ${slot} for ${duration} hours.
-Payment received of - \`${roundUpToDecimalPlace(amount, 4)}\` TON
+Payment received of - \`${roundUpToDecimalPlace(amountSol, 4)}\` SOL
 
 Transaction hash for your payment is \`${hash}\`. Your token would be visible, and available to be scanned the next time the bot updates the trending message, so it may take a minute or two. In case of any doubts please reach out to the admins of the bot for any query.
 
-Address Payment Received at - \`${sentTo}\``;
-
-        if (isTrendingPayment) {
-          const terminalResponse = apiFetcher<TokenPoolData>(
-            `https://api.geckoterminal.com/api/v2/search/pools?query=${token}&network=ton&page=1`
-          );
-          const dexSResonse = apiFetcher<PairsData>(
-            `${TOKEN_DATA_URL}/${token}`
-          );
-
-          const [terminalData, dexSData] = await Promise.all([
-            terminalResponse,
-            dexSResonse,
-          ]);
-
-          const terminalPool = terminalData.data.data?.at(0);
-          const dexSPool = dexSData.data.pairs?.at(0);
-
-          const name =
-            terminalPool?.attributes.name.split("/").at(0) ||
-            dexSPool?.baseToken.name;
-          const pairAddress =
-            terminalPool?.attributes.address || dexSPool?.pairAddress;
-
-          if (name && pairAddress) {
-            const terminalUrl = `https://www.geckoterminal.com/ton/pools/${pairAddress}`;
-            const explorer = `https://tonviewer.com/${token}`;
-            const buyLink = `https://app.ston.fi/swap`;
-            const trendingLink = `https://t.me/c/2141872035/1159`;
-
-            const text = `✅ New Token is Trending \\- ${name}
-
-CA: \`${hardCleanUpBotMessage(token)}\`
-Pool: \`${hardCleanUpBotMessage(pairAddress)}\`
-Link: ${hardCleanUpBotMessage(socials)}
-Ends in: ${duration} Hours
-
-[GeckoTerminal](${terminalUrl}) \\| [Explorer](${explorer})
-[Buy Token](${buyLink}) \\| [Trending](${trendingLink})`;
-
-            teleBot.api
-              .sendMessage(CHANNEL_ID || "", text, { parse_mode: "MarkdownV2" })
-              .catch((e) => errorHandler(e));
-          }
-        }
+Address Payment Received at - ${sentTo}`;
 
         const syncFunc = isTrendingPayment ? syncToTrend : syncAdvertisements;
-
-        if (isTrendingPayment) {
-          apiPoster(`${TRENDING_TOKENS_API}/syncTrending`).catch((e) =>
-            errorHandler(e)
-          );
-        } else {
-          apiPoster(`${TRENDING_TOKENS_API}/syncAdvertisements`).catch((e) =>
-            errorHandler(e)
-          );
-        }
 
         syncFunc()
           .then(() => {
@@ -388,7 +296,15 @@ Ends in: ${duration} Hours
           .catch((e) => errorHandler(e));
 
         // Splitting payment
-        splitPayment(decryptedMnemonic, Number(balance));
+        splitPayment(secretKey, balance);
+        // .then(() => {
+        //   updateDocumentById({
+        //     updates: { locked: false },
+        //     collectionName: "accounts",
+        //     id: accountID || "",
+        //   });
+        // })
+        // .catch((e) => errorHandler(e));
 
         return true;
       } catch (error) {
@@ -399,7 +315,15 @@ Ends in: ${duration} Hours
 
     log(`Account for payment hash ${hash} not found`);
     const failedText = `Your payment wasn't confirmed. Please contact the admins and provide your payment hash - \`${hash}\``;
-
+    // teleBot.api
+    //   .sendMessage(
+    //     LOGS_CHANNEL_ID || "",
+    //     cleanUpBotMessage(cleanUpBotMessage(failedText)),
+    //     {
+    //       parse_mode: "MarkdownV2",
+    //     }
+    //   )
+    //   .catch((e) => errorHandler(e));
     ctx.reply(failedText).catch((e) => errorHandler(e));
   } catch (error) {
     errorHandler(error);

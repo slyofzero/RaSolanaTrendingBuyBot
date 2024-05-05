@@ -26,4 +26,5 @@ export const {
   TOKEN_DATA_URL,
   ENCRYPTION_KEY,
   CHANNEL_ID,
+  RPC_ENDPOINT,
 } = process.env;

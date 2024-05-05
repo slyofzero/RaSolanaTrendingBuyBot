@@ -28,3 +28,17 @@ export function roundUpToDecimalPlace(
   const factor = 10 ** decimalPlaces;
   return Math.ceil(number * factor) / factor;
 }
+
+export function roundNumber(num: number, fixed?: number) {
+  fixed ||= 2;
+  const stringNum = String(num);
+  let [match] = stringNum.match(/\.\d*?([1-9])/) as string[];
+  match = match.replace(".", "");
+  return num.toFixed(match.length + (fixed - 1));
+}
+
+export function toTitleCase(str: string) {
+  return str.replace(/\b\w/g, function (char) {
+    return char.toUpperCase();
+  });
+}

@@ -1,6 +1,6 @@
 import { apiFetcher } from "@/utils/api";
 import { trendPrices } from "@/utils/constants";
-import { isValidTonAddress } from "@/utils/web3";
+import { isValidSolAddress } from "@/utils/web3";
 import { trendingState, userState } from "@/vars/state";
 import { toTrendTokens } from "@/vars/trending";
 import {
@@ -36,7 +36,7 @@ export async function addTrendingSocial(ctx: CommandContext<Context>) {
     const { id: chatId } = ctx.chat;
     const token = ctx.message?.text;
 
-    if (!isValidTonAddress(token || "")) {
+    if (!isValidSolAddress(token || "")) {
       return await ctx.reply("Please enter a proper token address");
     }
 

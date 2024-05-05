@@ -2,6 +2,8 @@ import fs from "fs";
 import { pipeline } from "stream/promises";
 import { errorHandler, log } from "./handlers";
 import path from "path";
+import { Connection, PublicKey } from "@solana/web3.js";
+import { Metaplex } from "@metaplex-foundation/js";
 
 export async function apiFetcher<T>(
   url: string,
@@ -49,5 +51,47 @@ export async function downloadFile(url: string, outputPath: string) {
     return filePath;
   } catch (error) {
     errorHandler(error);
+  }
+}
+
+export async function getTickerPrice(ticker: string) {
+  interface Price {
+    symbol: string;
+    price: string;
+  }
+
+  const priceData = await apiFetcher<Price>(
+    `https://api.binance.com/api/v3/ticker/price?symbol=${ticker}`
+  );
+  return Number(priceData.data.price);
+}
+
+export async function getTokenMetaData(token: string) {
+  try {
+    const connection = new Connection("https://api.mainnet-beta.solana.com");
+    const metaplex = Metaplex.make(connection);
+
+    const mintAddress = new PublicKey(token);
+
+    const metadataAccount = metaplex
+      .nfts()
+      .pdas()
+      .metadata({ mint: mintAddress });
+
+    const metadataAccountInfo = await connection.getAccountInfo(
+      metadataAccount
+    );
+
+    if (!metadataAccountInfo) {
+      throw Error("Metadata account not found");
+    }
+
+    const tokenData = await metaplex
+      .nfts()
+      .findByMint({ mintAddress: mintAddress });
+
+    return tokenData;
+  } catch (error) {
+    return undefined;
   }
 }

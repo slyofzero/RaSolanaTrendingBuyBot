@@ -1,52 +1,29 @@
 import { Bot } from "grammy";
 import { initiateBotCommands, initiateCallbackQueries } from "./bot";
 import { log, stopScript } from "./utils/handlers";
-import {
-  BOT_TOKEN,
-  HTTP_CLIENT,
-  TONCLIENT_API_KEY,
-  TONCLIENT_ENDPOINT,
-  TON_API_KEY,
-} from "./utils/env";
-import { Api, HttpClient } from "tonapi-sdk-js";
-import { TonClient } from "@ton/ton";
-import { subscribeAccount } from "./tonWeb3";
+import { BOT_TOKEN, PORT } from "./utils/env";
 import { syncTrendingTokens } from "./vars/trendingTokens";
 import { syncToTrend } from "./vars/trending";
 import { syncAdvertisements } from "./vars/advertisements";
 import { syncProjectGroups } from "./vars/projectGroups";
-import { rpcConfig } from "./rpc";
+import { rpcConfig } from "./rpc/config";
 import { cleanUpExpired } from "./bot/cleanup";
 import { unlockUnusedAccounts } from "./bot/cleanup/account";
-// import { dedustTransfer } from "./tonWeb3/transferTxn";
+import express, { Request, Response } from "express";
+import { parseTxn } from "./bot/parseTxn";
+
+if (!PORT) {
+  log("PORT is undefined");
+  process.exit(1);
+}
+
+const app = express();
 
 if (!BOT_TOKEN) {
   stopScript("BOT_TOKEN is missing.");
 }
 
-if (!TONCLIENT_ENDPOINT) {
-  stopScript("TONCLIENT_ENDPOINT is missing.");
-}
-
-if (!TONCLIENT_API_KEY) {
-  stopScript("TONCLIENT_API_KEY is missing.");
-}
-
-const httpClient = new HttpClient({
-  baseUrl: HTTP_CLIENT,
-  baseApiParams: {
-    headers: {
-      Authorization: `Bearer ${TON_API_KEY}`,
-      "Content-type": "application/json",
-    },
-  },
-});
-export const client = new Api(httpClient);
 export const teleBot = new Bot(BOT_TOKEN || "");
-export const tonClient = new TonClient({
-  endpoint: TONCLIENT_ENDPOINT || "",
-  apiKey: TONCLIENT_API_KEY || "",
-});
 log("Bot instance ready");
 
 (async function () {
@@ -63,9 +40,28 @@ log("Bot instance ready");
     syncProjectGroups(),
   ]);
 
-  subscribeAccount();
   setInterval(unlockUnusedAccounts, 60 * 60 * 1e3);
   setInterval(cleanUpExpired, 60 * 1e3);
+
+  app.use(express.json());
+
+  app.get("/ping", (req: Request, res: Response) => {
+    return res.status(200).json("Server setup properly");
+  });
+
+  app.post("/newTxn", (req: Request, res: Response) => {
+    try {
+      const txnData = req.body;
+      parseTxn(txnData);
+      return res.sendStatus(200);
+    } catch (error) {
+      return res.sendStatus(400);
+    }
+  });
+
+  app.listen(PORT, () => {
+    log(`Server is running on port ${PORT}`);
+  });
 
   // const txn = await client.blockchain.getBlockchainTransaction(
   //   "839fbf5b634333e7b3ae2cd22a9544bb9f3d7743f35928e1a677fa2de6693efd"

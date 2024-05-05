@@ -22,6 +22,7 @@ declare global {
       MAIN_ADDRESS: string | undefined;
       TRENDING_PRICES: string | undefined;
       AD_PRICES: string | undefined;
+      RPC_ENDPOINT: string | undefined;
     }
   }
 }

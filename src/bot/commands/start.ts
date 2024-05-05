@@ -79,7 +79,7 @@ type /settings`;
             });
             const data: StoredGroup = {
               chatId: String(chatId),
-              jetton: newAddress,
+              token: newAddress,
             };
             addDocument({ data, collectionName: "project_groups" });
           }
