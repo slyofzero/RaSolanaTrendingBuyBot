@@ -16,6 +16,8 @@ import { syncToTrend } from "./vars/trending";
 import { syncAdvertisements } from "./vars/advertisements";
 import { syncProjectGroups } from "./vars/projectGroups";
 import { rpcConfig } from "./rpc";
+import { cleanUpExpired } from "./bot/cleanup";
+import { unlockUnusedAccounts } from "./bot/cleanup/account";
 // import { dedustTransfer } from "./tonWeb3/transferTxn";
 
 if (!BOT_TOKEN) {
@@ -62,6 +64,8 @@ log("Bot instance ready");
   ]);
 
   subscribeAccount();
+  setInterval(unlockUnusedAccounts, 60 * 60 * 1e3);
+  setInterval(cleanUpExpired, 60 * 1e3);
 
   // const txn = await client.blockchain.getBlockchainTransaction(
   //   "839fbf5b634333e7b3ae2cd22a9544bb9f3d7743f35928e1a677fa2de6693efd"

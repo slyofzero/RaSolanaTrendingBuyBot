@@ -6,3 +6,4 @@ export * from "./pairData";
 export * from "./advertisement";
 export * from "./trendTokens";
 export * from "./trending";
+export * from "./accounts";
