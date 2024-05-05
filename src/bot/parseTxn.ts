@@ -1,7 +1,7 @@
 import { TokenData } from "@/types/token";
 import { TransactionData } from "@/types/txn";
 import { apiFetcher, getTokenMetaData } from "@/utils/api";
-import { hardCleanUpBotMessage } from "@/utils/bot";
+import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
 import { BOT_USERNAME, EXPLORER_URL, TRENDING_CHANNEL_ID } from "@/utils/env";
 import { projectGroups } from "@/vars/projectGroups";
 import { teleBot } from "..";
@@ -70,11 +70,13 @@ export async function parseTxn(txnData: TransactionData[]) {
       emojiCount = randomizeEmojiCount(70, 100);
     }
 
-    const cleanedName = name.replace(/\(/g, "\\(").replace(/\)/g, "\\)");
-    const shortendReceiver = `${receiver.slice(0, 3)}...${receiver.slice(
-      receiver.length - 3,
-      receiver.length
-    )}`.replace(/_/g, "_");
+    const cleanedName = hardCleanUpBotMessage(name);
+    const shortendReceiver = hardCleanUpBotMessage(
+      `${receiver.slice(0, 3)}...${receiver.slice(
+        receiver.length - 3,
+        receiver.length
+      )}`
+    );
     const chartUrl = `https://dexscreener.com/solana/${token}`;
     const soulScanLink = `https://t.me/soul_scanner_bot?start=${token}`;
     const soulSniperLink = `https://t.me/soul_sniper_bot?start=TruTrend_${token}`;
@@ -89,10 +91,11 @@ export async function parseTxn(txnData: TransactionData[]) {
     let prevBalance = balance - Number(amountReceived);
     prevBalance = prevBalance < 0 ? 0 : prevBalance;
 
-    const change =
+    const change = cleanUpBotMessage(
       prevBalance === 0
         ? "New!!!"
-        : `\\+${((Number(amountReceived) / prevBalance) * 100).toFixed(2)}%`;
+        : `\\+${((Number(amountReceived) / prevBalance) * 100).toFixed(2)}%`
+    );
 
     // Metadata
     const metadata = await getTokenMetaData(token);
@@ -120,14 +123,18 @@ export async function parseTxn(txnData: TransactionData[]) {
     const getBodyText = (emoji: string) => {
       const greenEmojis = `${emoji || "🟢"}`.repeat(emojiCount);
 
-      const text = `[${cleanedName} Buy!](https://t.me/${BOT_USERNAME})
+      const text = `[${cleanedName} Buy\\!](https://t.me/${BOT_USERNAME})
 ${greenEmojis}
 
-💲 *Spent*: ${amountSpentNative} ${tokenSpent} \\($${amountSpent}\\)
-💰 *Got*: ${Number(amountReceived).toFixed(2)} ${symbol}
+💲 *Spent*: ${cleanUpBotMessage(amountSpentNative)} ${hardCleanUpBotMessage(
+        tokenSpent
+      )} \\($${cleanUpBotMessage(amountSpent)}\\)
+💰 *Got*: ${cleanUpBotMessage(
+        Number(amountReceived).toFixed(2)
+      )} ${hardCleanUpBotMessage(symbol)}
 👤 *Buyer*: [${shortendReceiver}](${EXPLORER_URL}/account/${receiver})
-📊 *MC*: \\$${fdv.toLocaleString("en")}
-🏷 *Price*: \\$${roundNumber(priceUsd)}
+📊 *MC*: \\$${cleanUpBotMessage(fdv.toLocaleString("en"))}
+🏷 *Price*: \\$${cleanUpBotMessage(roundNumber(priceUsd))}
 📈 *Position*: ${change}
 ${trendingText}
 [*📊 Chart*](${chartUrl}) \\| [*✨ Tx*](${EXPLORER_URL}/tx/${signature}) 

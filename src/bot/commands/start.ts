@@ -1,17 +1,26 @@
 import { addDocument, getDocument, updateDocumentById } from "@/firebase";
 import { BotCommandContextType, StoredGroup } from "@/types";
 import { cleanUpBotMessage } from "@/utils/bot";
-import { BOT_USERNAME } from "@/utils/env";
-import { Address } from "@ton/ton";
+import { BOT_USERNAME, WEBHOOK_URL } from "@/utils/env";
 import { onlyAdmin } from "../utils";
 import { syncProjectGroups } from "@/vars/projectGroups";
 import { trend } from "./trend";
 import { advertise } from "./advertise";
-import { errorHandler } from "@/utils/handlers";
+import { errorHandler, log } from "@/utils/handlers";
+import web3 from "@solana/web3.js";
+import { apiFetcher } from "@/utils/api";
+import { TokenData } from "@/types/token";
+import { trackedTokens } from "@/vars/trackedToken";
+import { helius } from "@/index";
+import { TransactionType } from "helius-sdk";
 
 export async function startBot(ctx: BotCommandContextType) {
+  if (!WEBHOOK_URL) {
+    return log(`WEBHOOK_URL is undefined`);
+  }
+
   try {
-    const { match: jetton } = ctx;
+    const { match: token } = ctx;
     const { id: chatId, type } = ctx.chat;
     let text = `*Welcome to ${BOT_USERNAME}!!!*\n\n`;
 
@@ -47,29 +56,43 @@ export async function startBot(ctx: BotCommandContextType) {
       const isAdmin = await onlyAdmin(ctx);
       if (!isAdmin) return false;
 
-      if (jetton) {
-        text = `This ${type} would now get updates for \`${jetton}\` buys. Each time the bot detects a buy for your jetton, a message would be sent in this group with some data about it.
+      if (token) {
+        text = `This ${type} would now get updates for \`${token}\` buys. Each time the bot detects a buy for your token, a message would be sent in this group with some data about it.
 
 To configure buybot;
 type /settings`;
 
         try {
-          const newAddress = Address.parse(jetton).toRawString();
-          const projectData =
-            ((
-              await getDocument({
-                collectionName: "project_groups",
-                queries: [["chatId", "==", String(chatId)]],
-              })
-            ).at(0) as StoredGroup) || undefined;
+          new web3.PublicKey(token);
+          const data = (
+            await apiFetcher<TokenData>(
+              `https://api.dexscreener.com/latest/dex/tokens/${token}`
+            )
+          ).data;
+
+          const firstPair = data?.pairs.at(0);
+          const pairs = data.pairs.map(({ pairAddress }) => pairAddress);
+
+          if (!data || !firstPair) {
+            log(`No data found for ${token}`);
+            return ctx.reply(
+              `No data found for ${token}. Either the token address you passed is invalid, or dexscreener doesn't have data about this token`
+            );
+          }
+
+          const projectData = (
+            await getDocument<StoredGroup>({
+              collectionName: "project_groups",
+              queries: [["chatId", "==", String(chatId)]],
+            })
+          ).at(0);
 
           if (projectData) {
             await ctx.reply(cleanUpBotMessage(text), {
               parse_mode: "MarkdownV2",
             });
-            const updates = { jetton: newAddress };
-            updateDocumentById({
-              updates,
+            updateDocumentById<StoredGroup>({
+              updates: { token },
               collectionName: "project_groups",
               id: projectData.id || "",
             });
@@ -79,17 +102,57 @@ type /settings`;
             });
             const data: StoredGroup = {
               chatId: String(chatId),
-              token: newAddress,
+              token,
             };
-            addDocument({ data, collectionName: "project_groups" });
+            addDocument<StoredGroup>({
+              data,
+              collectionName: "project_groups",
+            });
           }
 
           syncProjectGroups();
+
+          // ------------------------------ HELIUS STUFF ------------------------------
+          const tokenAlreadyTracking = Boolean(
+            trackedTokens.find((storedToken) => storedToken === token)
+          );
+          log(`New token ${token} is being tracked: ${tokenAlreadyTracking}`);
+
+          if (!tokenAlreadyTracking) {
+            const webhooks = await helius.getAllWebhooks();
+
+            if (webhooks.length) {
+              const firstWebhook = webhooks.at(0);
+
+              if (firstWebhook) {
+                helius
+                  .editWebhook(firstWebhook.webhookID, {
+                    accountAddresses: [
+                      ...firstWebhook.accountAddresses,
+                      ...pairs,
+                    ],
+                  })
+                  .then((hook) => {
+                    log(`Updated webhook ${hook.webhookID} for ${token}`);
+                  });
+              }
+            } else {
+              helius
+                .createWebhook({
+                  accountAddresses: pairs,
+                  transactionTypes: [TransactionType.SWAP],
+                  webhookURL: WEBHOOK_URL,
+                })
+                .then((hook) => {
+                  log(`New webhook ${hook.webhookID} added for ${token}`);
+                });
+            }
+          }
         } catch (error) {
-          await ctx.reply("The jetton address you passed was incorrect.");
+          await ctx.reply("The token address you passed was incorrect.");
         }
       } else {
-        text += `To start the buy, add \\@${BOT_USERNAME} as an admin \\(this allows the bot to send messages\\) and then do /start in the below format -\n/start \\<jetton address\\>.`;
+        text += `To start the buy, add \\@${BOT_USERNAME} as an admin \\(this allows the bot to send messages\\) and then do /start in the below format -\n/start \\<token address\\>.`;
         await ctx.reply(cleanUpBotMessage(text), { parse_mode: "MarkdownV2" });
       }
     }

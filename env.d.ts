@@ -23,6 +23,8 @@ declare global {
       TRENDING_PRICES: string | undefined;
       AD_PRICES: string | undefined;
       RPC_ENDPOINT: string | undefined;
+      HELIS_API_KEY: string | undefined;
+      WEBHOOK_URL: string | undefined;
     }
   }
 }

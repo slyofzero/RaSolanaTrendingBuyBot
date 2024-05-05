@@ -27,4 +27,6 @@ export const {
   ENCRYPTION_KEY,
   CHANNEL_ID,
   RPC_ENDPOINT,
+  HELIS_API_KEY,
+  WEBHOOK_URL,
 } = process.env;

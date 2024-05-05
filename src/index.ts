@@ -1,7 +1,7 @@
 import { Bot } from "grammy";
 import { initiateBotCommands, initiateCallbackQueries } from "./bot";
 import { log, stopScript } from "./utils/handlers";
-import { BOT_TOKEN, PORT } from "./utils/env";
+import { BOT_TOKEN, HELIS_API_KEY, PORT } from "./utils/env";
 import { syncTrendingTokens } from "./vars/trendingTokens";
 import { syncToTrend } from "./vars/trending";
 import { syncAdvertisements } from "./vars/advertisements";
@@ -11,6 +11,7 @@ import { cleanUpExpired } from "./bot/cleanup";
 import { unlockUnusedAccounts } from "./bot/cleanup/account";
 import express, { Request, Response } from "express";
 import { parseTxn } from "./bot/parseTxn";
+import { Helius } from "helius-sdk";
 
 if (!PORT) {
   log("PORT is undefined");
@@ -25,6 +26,8 @@ if (!BOT_TOKEN) {
 
 export const teleBot = new Bot(BOT_TOKEN || "");
 log("Bot instance ready");
+
+export const helius = new Helius(HELIS_API_KEY || "");
 
 (async function () {
   rpcConfig();
@@ -62,14 +65,31 @@ log("Bot instance ready");
   app.listen(PORT, () => {
     log(`Server is running on port ${PORT}`);
   });
-
-  // const txn = await client.blockchain.getBlockchainTransaction(
-  //   "839fbf5b634333e7b3ae2cd22a9544bb9f3d7743f35928e1a677fa2de6693efd"
-  // );
-  // const outMsg = txn.out_msgs.find(
-  //   ({ decoded_op_name }) => decoded_op_name?.trim() === "dedust_swap"
-  // );
-  // if (outMsg) dedustTransfer(txn, outMsg);
-
-  // Server
 })();
+
+// import { TransactionType } from "helius-sdk";
+
+// helius
+//   .createWebhook({
+//     accountAddresses: ["7tD14BqShsvrbAntNSv1ZxW5jmxAaAGjazcBPHCVT6fW"],
+//     transactionTypes: [TransactionType.SWAP],
+//     webhookURL: "https://webhook.site/c9a41dca-c092-47f8-873e-d92b7f59b3ad",
+//   })
+//   .then((hook) => {
+//     console.log(hook);
+//   });
+
+// helius.getAllWebhooks().then((hooks) => {
+//   console.log(hooks);
+// });
+
+// helius
+//   .deleteWebhook("37a0749c-6a24-44c1-9250-f2976ea6304f")
+//   .then((hook) => {
+//     console.log(hook);
+//   })
+//   .then(() => {
+//     helius.getAllWebhooks().then((hooks) => {
+//       console.log(hooks);
+//     });
+//   });
