@@ -7,7 +7,6 @@ import {
   COINGECKO_API_KEY,
   DEX_URL,
   EXPLORER_URL,
-  TRENDING_BOT_USERNAME,
   TRENDING_MSG,
 } from "@/utils/env";
 import { getJetton } from "@/tonWeb3";
@@ -189,7 +188,7 @@ export async function sendAlert(txnData: TxnData) {
     const activeAd = advertisements.find(({ status }) => status === "PAID");
     const adText = activeAd
       ? `Ad: [${hardCleanUpBotMessage(activeAd.text)}](${activeAd.link})`
-      : `Ad: [Place your advertisement here](https://t.me/${TRENDING_BOT_USERNAME}?start=adBuyRequest)`;
+      : `Ad: [Place your advertisement here](https://t.me/${BOT_USERNAME}?start=adBuyRequest)`;
 
     const getBodyText = (emoji: string) => {
       const greenEmojis = `${emoji || "👾"}`.repeat(emojiCount);
