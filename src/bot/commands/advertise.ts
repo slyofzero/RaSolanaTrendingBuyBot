@@ -73,7 +73,7 @@ export async function selectAdDuration(ctx: CommandContext<Context>) {
 
     for (const duration in adPrices) {
       const price = adPrices[duration];
-      const slotText = `${duration} hours : ${price} TON`;
+      const slotText = `${duration} hours : ${price} SOL`;
       keyboard = keyboard.text(slotText, `adDuration-${duration}`).row();
     }
 

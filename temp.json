@@ -1,0 +1,50 @@
+{
+  "update": {
+    "update_id": 103295991,
+    "message": {
+      "message_id": 19,
+      "from": {
+        "id": 1426563330,
+        "is_bot": false,
+        "first_name": "Zero",
+        "username": "sly_of_zero",
+        "language_code": "en"
+      },
+      "chat": {
+        "id": 1426563330,
+        "first_name": "Zero",
+        "username": "sly_of_zero",
+        "type": "private"
+      },
+      "date": 1716963435,
+      "animation": {
+        "file_name": "mp4.mp4",
+        "mime_type": "video/mp4",
+        "duration": 3,
+        "width": 240,
+        "height": 240,
+        "file_id": "CgACAgQAAxkBAAMTZlbIa5nFkehmF5Wgu7bF0ClOPzcAAhsDAAK6l61SkOx5MA_XVfY1BA",
+        "file_unique_id": "AgADGwMAArqXrVI",
+        "file_size": 125266
+      },
+      "document": {
+        "file_name": "mp4.mp4",
+        "mime_type": "video/mp4",
+        "file_id": "CgACAgQAAxkBAAMTZlbIa5nFkehmF5Wgu7bF0ClOPzcAAhsDAAK6l61SkOx5MA_XVfY1BA",
+        "file_unique_id": "AgADGwMAArqXrVI",
+        "file_size": 125266
+      }
+    }
+  },
+  "api": { "raw": {}, "config": {} },
+  "me": {
+    "id": 7098055520,
+    "is_bot": true,
+    "first_name": "RaSolanaBuyBot",
+    "username": "RaSolanaBuyBot",
+    "can_join_groups": true,
+    "can_read_all_group_messages": false,
+    "supports_inline_queries": false,
+    "can_connect_to_business": false
+  }
+}

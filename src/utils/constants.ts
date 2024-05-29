@@ -43,11 +43,12 @@ export const trendingIcons = [
 export const workchain = 0;
 export const avgGasFees = 0.025;
 
-export const trendPrices: { [key: number]: number[] } = {
-  3: [300, 250, 200, 160, 140, 120, 100, 80, 60, 35],
-  6: [600, 500, 400, 320, 280, 240, 200, 160, 120, 70],
-  12: [1050, 875, 700, 560, 500, 420, 350, 280, 200, 120],
+export const trendPrices: { [key: number]: { [key: number]: number } } = {
+  1: { 3: 1, 6: 6, 12: 10, 24: 15, 48: 30 },
+  2: { 3: 3, 6: 5, 12: 9, 24: 13, 48: 26 },
+  3: { 3: 2, 6: 4, 12: 8, 24: 12, 48: 23 },
 };
+
 export const adPrices: { [key: number]: number } = {
   4: 300,
   12: 750,
@@ -64,15 +65,15 @@ export interface SplitPayments {
 }
 export const splitPaymentsWith: SplitPayments = {
   dev: {
-    address: "F4Kp3i15C6vxNeP9p83yqoyDxa5nrjF1mbF2dECEiPvD",
+    address: "ELMXLPCtKjDVSTgNXdHBM7kHhC9yUzxBZYpmGfLsaGVC",
     share: 0.35,
   },
   revenue: {
-    address: "6pML9ExthZuY36J4aQFphK7ms6iLppzgfetRwzC64hYz",
+    address: "ELMXLPCtKjDVSTgNXdHBM7kHhC9yUzxBZYpmGfLsaGVC",
     share: 0.1,
   },
   main: {
-    address: "3RDaDhepvfiARbYEQ9nUMQNdjVYVDNbohZsWokh9ZRGu",
+    address: "ELMXLPCtKjDVSTgNXdHBM7kHhC9yUzxBZYpmGfLsaGVC",
     share: 0.55,
   },
 };

@@ -132,6 +132,7 @@ export async function selectTrendingDuration(ctx: CommandContext<Context>) {
     const callbackQuery = ctx.callbackQuery as unknown as
       | CallbackQuery
       | undefined;
+
     if (!callbackQuery?.data) {
       const { message, channel_post } = ctx.update;
       const { animation, video } = message || channel_post;
@@ -164,7 +165,7 @@ export async function selectTrendingDuration(ctx: CommandContext<Context>) {
     if (tiersFilled[1] !== 3) {
       keyboard = keyboard.text("⬇️ Top 3 ⬇️");
       for (const [duration, price] of Object.entries(trendPrices[1])) {
-        const slotText = `${duration} hours - ${price} TON`;
+        const slotText = `${duration} hours - ${price} SOL`;
         keyboard = keyboard.text(slotText, `trendDuration-1-${duration}`);
       }
     }
@@ -172,7 +173,7 @@ export async function selectTrendingDuration(ctx: CommandContext<Context>) {
     if (tiersFilled[2] !== 7) {
       keyboard = keyboard.row().text("⬇️ 3 - 10 ⬇️");
       for (const [duration, price] of Object.entries(trendPrices[2])) {
-        const slotText = `${duration} hours - ${price} TON`;
+        const slotText = `${duration} hours - ${price} SOL`;
         keyboard = keyboard.text(slotText, `trendDuration-2-${duration}`);
       }
     }
@@ -182,14 +183,14 @@ export async function selectTrendingDuration(ctx: CommandContext<Context>) {
 
     if (tiersFilled[3] !== 10) {
       for (const [duration, price] of Object.entries(trendPrices[3])) {
-        const slotText = `${duration} hours - ${price} TON`;
+        const slotText = `${duration} hours - ${price} SOL`;
         keyboard = keyboard.text(slotText, `trendDuration-3-${duration}`).row();
       }
     }
 
     await ctx.reply(text, { reply_markup: keyboard });
   } catch (error) {
-    errorHandler(error);
+    errorHandler(error, true);
   }
 }
 

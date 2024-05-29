@@ -10,9 +10,6 @@ import { errorHandler, log } from "@/utils/handlers";
 import web3 from "@solana/web3.js";
 import { apiFetcher } from "@/utils/api";
 import { TokenData } from "@/types/token";
-import { trackedTokens } from "@/vars/trackedToken";
-import { helius } from "@/index";
-import { TransactionType } from "helius-sdk";
 
 export async function startBot(ctx: BotCommandContextType) {
   if (!WEBHOOK_URL) {
@@ -91,8 +88,8 @@ type /settings`;
             await ctx.reply(cleanUpBotMessage(text), {
               parse_mode: "MarkdownV2",
             });
-            updateDocumentById<StoredGroup>({
-              updates: { token },
+            await updateDocumentById<StoredGroup>({
+              updates: { token, pairs },
               collectionName: "project_groups",
               id: projectData.id || "",
             });
@@ -103,52 +100,17 @@ type /settings`;
             const data: StoredGroup = {
               chatId: String(chatId),
               token,
+              pairs,
             };
-            addDocument<StoredGroup>({
+            await addDocument<StoredGroup>({
               data,
               collectionName: "project_groups",
             });
           }
 
           syncProjectGroups();
-
-          // ------------------------------ HELIUS STUFF ------------------------------
-          const tokenAlreadyTracking = Boolean(
-            trackedTokens.find((storedToken) => storedToken === token)
-          );
-          log(`New token ${token} is being tracked: ${tokenAlreadyTracking}`);
-
-          if (!tokenAlreadyTracking) {
-            const webhooks = await helius.getAllWebhooks();
-
-            if (webhooks.length) {
-              const firstWebhook = webhooks.at(0);
-
-              if (firstWebhook) {
-                helius
-                  .editWebhook(firstWebhook.webhookID, {
-                    accountAddresses: [
-                      ...firstWebhook.accountAddresses,
-                      ...pairs,
-                    ],
-                  })
-                  .then((hook) => {
-                    log(`Updated webhook ${hook.webhookID} for ${token}`);
-                  });
-              }
-            } else {
-              helius
-                .createWebhook({
-                  accountAddresses: pairs,
-                  transactionTypes: [TransactionType.SWAP],
-                  webhookURL: WEBHOOK_URL,
-                })
-                .then((hook) => {
-                  log(`New webhook ${hook.webhookID} added for ${token}`);
-                });
-            }
-          }
         } catch (error) {
+          errorHandler(error);
           await ctx.reply("The token address you passed was incorrect.");
         }
       } else {

@@ -1,10 +1,8 @@
 import { getNow } from "./time";
 
-// eslint-disable-next-line
-export function log(message: any) {
-  const time = `[-----${getNow()}-----]`;
+export function log(...messages: any[]) {
   // eslint-disable-next-line no-console
-  console.log(time, message);
+  console.log(`[-----${getNow()}-----]`, ...messages);
 }
 
 export function stopScript(message: string, exitCode?: number) {

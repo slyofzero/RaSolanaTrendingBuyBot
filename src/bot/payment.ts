@@ -7,16 +7,10 @@ import {
 import { StoredAdvertisement } from "@/types";
 import { StoredAccount } from "@/types/accounts";
 import { StoredToTrend } from "@/types/trending";
-import { apiFetcher } from "@/utils/api";
 import { cleanUpBotMessage } from "@/utils/bot";
-import {
-  adPrices,
-  ethPriceApi,
-  transactionValidTime,
-  trendPrices,
-} from "@/utils/constants";
+import { adPrices, transactionValidTime, trendPrices } from "@/utils/constants";
 import { decrypt, encrypt } from "@/utils/cryptography";
-import { BOT_USERNAME } from "@/utils/env";
+import { BOT_USERNAME, TRENDING_TOKENS_API } from "@/utils/env";
 import { roundUpToDecimalPlace } from "@/utils/general";
 import { errorHandler, log } from "@/utils/handlers";
 import { getSecondsElapsed, sleep } from "@/utils/time";
@@ -29,6 +23,7 @@ import { CallbackQueryContext, Context, InlineKeyboard } from "grammy";
 import { customAlphabet } from "nanoid";
 import web3, { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { solanaConnection } from "@/rpc/config";
+import { apiPoster } from "@/utils/api";
 
 const alphabet =
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -79,34 +74,52 @@ export async function preparePayment(ctx: CallbackQueryContext<Context>) {
 
   const isTrendingPayment = Boolean(trendingState[chatId]);
   const commandToRedo = isTrendingPayment ? `/trend` : `/advertise`;
-  const callbackReplace = isTrendingPayment ? `trendSlot` : `adSlot`;
+  const callbackReplace = isTrendingPayment ? `trendDuration` : `adDuration`;
 
   try {
     ctx.deleteMessage();
     const slot = Number(
-      ctx.callbackQuery.data.replace(`${callbackReplace}-`, "")
+      ctx.callbackQuery.data.replace(`${callbackReplace}-`, "").at(0)
     );
     const account = await getUnlockedAccount();
     const hash = nanoid(10);
 
     const { duration } = trendingState[chatId] || advertisementState[chatId];
+
     if (!duration || !slot)
       return ctx.reply(`Please do ${commandToRedo} again`);
 
     // ------------------------------ Calculating prices based on trend or ad buy ------------------------------
-    let priceUsd = 0;
+    // let priceUsd = 0;
+    // if (isTrendingPayment) {
+    //   priceUsd = trendPrices[duration][slot - 1];
+    // } else {
+    //   priceUsd = adPrices[duration];
+    // }
+
+    // const ethPrice = (await apiFetcher<any>(ethPriceApi)).data.price;
+    // const priceSol = parseFloat((priceUsd / ethPrice).toFixed(8));
+
+    // ------------------------------ Calculating prices based on trend or ad buy ------------------------------
+    let priceSol = 0;
+
     if (isTrendingPayment) {
-      priceUsd = trendPrices[duration][slot - 1];
+      priceSol = trendPrices[slot as 1 | 2 | 3][duration];
     } else {
-      priceUsd = adPrices[duration];
+      priceSol = adPrices[duration];
     }
 
-    const ethPrice = (await apiFetcher<any>(ethPriceApi)).data.price;
-    const priceSol = parseFloat((priceUsd / ethPrice).toFixed(8));
-
     const slotText = isTrendingPayment ? "trending" : "ad";
+    const displaySlot = !isTrendingPayment
+      ? slot
+      : slot === 1
+      ? "1-3"
+      : slot === 2
+      ? "3-10"
+      : "11-20";
+
     const paymentCategory = isTrendingPayment ? "trendingPayment" : "adPayment";
-    let text = `You have selected ${slotText} slot ${slot} for ${duration} hours.
+    let text = `You have selected ${slotText} slots ${displaySlot} for ${duration} hours.
 The total cost - \`${roundUpToDecimalPlace(priceSol, 4)}\` SOL
 
 Send the bill amount to the below address within 20 minutes, starting from this message generation. Once paid, click on "I have paid" to verify payment. If 20 minutes have already passed then please restart using ${commandToRedo}. 
@@ -135,11 +148,14 @@ Address - \`${account}\``;
     } as StoredToTrend | StoredAdvertisement;
 
     if (isTrendingPayment) {
-      const { token } = trendingState[chatId];
+      const { token, social, gif, emoji } = trendingState[chatId];
       dataToAdd = {
         ...dataToAdd,
         // @ts-expect-error weird
         token: token || "",
+        socials: social || "",
+        gif: gif || "",
+        emoji: emoji || "",
       };
     } else {
       const { text, link } = advertisementState[chatId];
@@ -245,7 +261,7 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
 
         if (balance < amount) {
           log(`Transaction amount doesn't match`);
-          await sleep(30000);
+          await sleep(10000);
           continue attemptsCheck;
         }
 
@@ -259,7 +275,7 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
         //   .sendMessage(PAYMENT_LOGS_CHANNEL_ID || "", logText)
         //   .catch((e) => errorHandler(e));
 
-        updateDocumentById({
+        await updateDocumentById({
           updates: {
             status: "PAID",
             paidAt: currentTimestamp,
@@ -280,6 +296,16 @@ Transaction hash for your payment is \`${hash}\`. Your token would be visible, a
 Address Payment Received at - ${sentTo}`;
 
         const syncFunc = isTrendingPayment ? syncToTrend : syncAdvertisements;
+
+        if (isTrendingPayment) {
+          apiPoster(`${TRENDING_TOKENS_API}/syncTrending`).catch((e) =>
+            errorHandler(e)
+          );
+        } else {
+          apiPoster(`${TRENDING_TOKENS_API}/syncAdvertisements`).catch((e) =>
+            errorHandler(e)
+          );
+        }
 
         syncFunc()
           .then(() => {
@@ -309,7 +335,7 @@ Address Payment Received at - ${sentTo}`;
         return true;
       } catch (error) {
         errorHandler(error);
-        await sleep(30000);
+        await sleep(10000);
       }
     }
 

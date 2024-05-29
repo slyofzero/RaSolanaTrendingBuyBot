@@ -2,9 +2,9 @@ import { apiFetcher } from "@/utils/api";
 import { TRENDING_AUTH_KEY, TRENDING_TOKENS_API } from "@/utils/env";
 import { errorHandler, log } from "@/utils/handlers";
 
-type TrendingTokens = string[];
+type TrendingTokens = { [key: string]: string };
 
-export let trendingTokens: TrendingTokens = [];
+export let trendingTokens: TrendingTokens = {};
 
 export async function syncTrendingTokens() {
   try {
@@ -19,9 +19,14 @@ export async function syncTrendingTokens() {
     ).data as { trendingTokens: TrendingTokens };
 
     trendingTokens = newTrendingTokens;
-    log(`Getting trending pairs data, got ${trendingTokens.length} tokens`);
+
+    log(
+      `Getting trending pairs data, got ${
+        Object.entries(trendingTokens).length
+      } tokens`
+    );
   } catch (error) {
     errorHandler(error);
-    trendingTokens = [];
+    trendingTokens = {};
   }
 }
