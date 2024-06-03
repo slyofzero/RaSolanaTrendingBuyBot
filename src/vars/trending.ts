@@ -1,27 +1,32 @@
-import { getDocument } from "@/firebase";
-import { StoredToTrend, TrendingTokens } from "@/types/trending";
-import { log } from "@/utils/handlers";
+import { apiFetcher } from "@/utils/api";
+import { TRENDING_AUTH_KEY, TRENDING_TOKENS_API } from "@/utils/env";
+import { errorHandler, log } from "@/utils/handlers";
 
-export let trendingTokens: TrendingTokens = [];
-export let previouslyTrendingTokens: string[] = [];
+type TrendingTokens = { [key: string]: string };
 
-// Related to paid trending tokens
-export let allToTrend: StoredToTrend[] = [];
-export let toTrendTokens: StoredToTrend[] = [];
-export function setTopTrendingTokens(newTrendingTokens: TrendingTokens) {
-  previouslyTrendingTokens = trendingTokens.map(([token]) => token);
-  trendingTokens = newTrendingTokens;
-}
+export let trendingTokens: TrendingTokens = {};
 
-export async function syncToTrend() {
-  allToTrend = await getDocument<StoredToTrend>({
-    collectionName: "to_trend",
-    queries: [["status", "in", ["PAID", "MANUAL", "PENDING"]]],
-  });
+export async function syncTrendingTokens() {
+  try {
+    if (!TRENDING_TOKENS_API) {
+      return log(`TRENDING_TOKENS_API is undefined`);
+    }
 
-  toTrendTokens = allToTrend
-    .sort((a, b) => a.slot - b.slot)
-    .filter(({ status }) => ["PAID", "MANUAL"].includes(status));
+    const { trendingTokens: newTrendingTokens } = (
+      await apiFetcher(`${TRENDING_TOKENS_API}/trending`, {
+        Authorization: TRENDING_AUTH_KEY || "",
+      })
+    ).data as { trendingTokens: TrendingTokens };
 
-  log(`Synced to_trend data`);
+    trendingTokens = newTrendingTokens;
+
+    log(
+      `Getting trending pairs data, got ${
+        Object.entries(trendingTokens).length
+      } tokens`
+    );
+  } catch (error) {
+    errorHandler(error);
+    trendingTokens = {};
+  }
 }

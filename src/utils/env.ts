@@ -30,3 +30,7 @@ export const {
   HELIS_API_KEY,
   WEBHOOK_URL,
 } = process.env;
+
+export const TRENDING_BOT_TOKENS: string[] = JSON.parse(
+  process.env.TRENDING_BOT_TOKENS || "[]"
+);

@@ -25,6 +25,7 @@ declare global {
       RPC_ENDPOINT: string | undefined;
       HELIS_API_KEY: string | undefined;
       WEBHOOK_URL: string | undefined;
+      TRENDING_BOT_TOKENS: string | undefined;
     }
   }
 }

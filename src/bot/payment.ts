@@ -17,7 +17,7 @@ import { getSecondsElapsed, sleep } from "@/utils/time";
 import { generateAccount, splitPayment } from "@/utils/web3";
 import { syncAdvertisements } from "@/vars/advertisements";
 import { advertisementState, trendingState } from "@/vars/state";
-import { syncToTrend } from "@/vars/trending";
+import { syncToTrend } from "@/vars/toTrend";
 import { Timestamp } from "firebase-admin/firestore";
 import { CallbackQueryContext, Context, InlineKeyboard } from "grammy";
 import { customAlphabet } from "nanoid";

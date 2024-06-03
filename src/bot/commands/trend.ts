@@ -2,7 +2,7 @@ import { apiFetcher } from "@/utils/api";
 import { trendPrices } from "@/utils/constants";
 import { isValidSolAddress } from "@/utils/web3";
 import { trendingState, userState } from "@/vars/state";
-import { toTrendTokens } from "@/vars/trending";
+import { toTrendTokens } from "@/vars/toTrend";
 import {
   CallbackQueryContext,
   CommandContext,

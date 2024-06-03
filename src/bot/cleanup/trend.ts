@@ -2,7 +2,7 @@ import { updateDocumentById } from "@/firebase";
 import { transactionValidTime } from "@/utils/constants";
 import { errorHandler, log } from "@/utils/handlers";
 import { getSecondsElapsed } from "@/utils/time";
-import { allToTrend, syncToTrend } from "@/vars/trending";
+import { allToTrend, syncToTrend } from "@/vars/toTrend";
 
 export async function cleanUpPendingToTrend() {
   for (const trend of allToTrend) {

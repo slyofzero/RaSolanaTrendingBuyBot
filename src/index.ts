@@ -1,16 +1,15 @@
 import { Bot } from "grammy";
 import { initiateBotCommands, initiateCallbackQueries } from "./bot";
 import { log, stopScript } from "./utils/handlers";
-import { BOT_TOKEN, PORT } from "./utils/env";
-import { syncTrendingTokens } from "./vars/trendingTokens";
-import { syncToTrend } from "./vars/trending";
+import { BOT_TOKEN, PORT, TRENDING_BOT_TOKENS } from "./utils/env";
 import { syncAdvertisements } from "./vars/advertisements";
-import { syncProjectGroups } from "./vars/projectGroups";
 import { rpcConfig } from "./rpc/config";
 import { cleanUpExpired } from "./bot/cleanup";
 import { unlockUnusedAccounts } from "./bot/cleanup/account";
 import express from "express";
-import { pairsToWatch, syncPairsToWatch } from "./vars/pairsToWatch";
+import { syncPairsToWatch, tokensToWatch } from "./vars/pairsToWatch";
+import { memoizeTokenData } from "./vars/tokens";
+import { syncTrendingTokens } from "./vars/trending";
 
 if (!PORT) {
   log("PORT is undefined");
@@ -24,7 +23,16 @@ if (!BOT_TOKEN) {
 }
 
 export const teleBot = new Bot(BOT_TOKEN || "");
+export const trendingBuyAlertBots = TRENDING_BOT_TOKENS.map(
+  (token) => new Bot(token)
+);
 log("Bot instance ready");
+
+async function syncAll() {
+  await syncTrendingTokens();
+  await memoizeTokenData(tokensToWatch);
+  setTimeout(syncAll, 60 * 1e3);
+}
 
 (async function () {
   rpcConfig();
@@ -33,14 +41,8 @@ log("Bot instance ready");
   initiateBotCommands();
   initiateCallbackQueries();
 
-  await Promise.all([
-    syncTrendingTokens(),
-    syncToTrend(),
-    syncAdvertisements(),
-    syncProjectGroups(),
-  ]);
-  // await syncPairsToWatch();
-  // console.log(pairsToWatch);
+  await Promise.all([syncAdvertisements(), syncPairsToWatch()]);
+  await syncAll();
 
   setInterval(unlockUnusedAccounts, 60 * 60 * 1e3);
   setInterval(cleanUpExpired, 60 * 1e3);
