@@ -40,6 +40,9 @@ log("Bot instance ready");
 
   app.use(express.json());
 
+  app.get("/ping", (req, res) => res.send({ message: "Server up" }));
+  app.post("/syncTrending", () => syncTrendingTokens());
+
   app.listen(PORT, () => {
     log(`Server is running on port ${PORT}`);
   });
