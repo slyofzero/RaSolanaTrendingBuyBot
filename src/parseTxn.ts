@@ -3,7 +3,7 @@ import { TransactionNotification } from "./types";
 import { memoTokenData } from "./vars/tokens";
 
 export async function parseTxn(data: TransactionNotification) {
-  const { transaction: transactionResult } = data.params.result;
+  const { transaction: transactionResult, signature } = data.params.result;
   const { meta, transaction } = transactionResult;
   const { preTokenBalances, postTokenBalances } = meta;
 
@@ -32,10 +32,15 @@ export async function parseTxn(data: TransactionNotification) {
         const amount = parseFloat(
           (uiTokenAmount.uiAmount - preBalance).toFixed(2)
         );
+        const change = !preBalance
+          ? 0
+          : parseFloat(((amount / preBalance) * 100).toFixed(2));
         const buyData: BuyData = {
           buyer: signer,
           amount,
           token,
+          change,
+          signature,
         };
 
         sendAlert(buyData);

@@ -7,9 +7,9 @@ import { rpcConfig } from "./rpc/config";
 import { cleanUpExpired } from "./bot/cleanup";
 import { unlockUnusedAccounts } from "./bot/cleanup/account";
 import express from "express";
-import { syncPairsToWatch, tokensToWatch } from "./vars/pairsToWatch";
-import { memoizeTokenData } from "./vars/tokens";
+import { syncProjectGroups } from "./vars/projectGroups";
 import { syncTrendingTokens } from "./vars/trending";
+import { sleep } from "./utils/time";
 
 if (!PORT) {
   log("PORT is undefined");
@@ -28,12 +28,6 @@ export const trendingBuyAlertBots = TRENDING_BOT_TOKENS.map(
 );
 log("Bot instance ready");
 
-async function syncAll() {
-  await syncTrendingTokens();
-  await memoizeTokenData(tokensToWatch);
-  setTimeout(syncAll, 60 * 1e3);
-}
-
 (async function () {
   rpcConfig();
   teleBot.start();
@@ -41,8 +35,9 @@ async function syncAll() {
   initiateBotCommands();
   initiateCallbackQueries();
 
-  await Promise.all([syncAdvertisements(), syncPairsToWatch()]);
-  await syncAll();
+  await Promise.all([syncAdvertisements(), syncTrendingTokens()]);
+  await sleep(5000);
+  await syncProjectGroups();
 
   setInterval(unlockUnusedAccounts, 60 * 60 * 1e3);
   setInterval(cleanUpExpired, 60 * 1e3);

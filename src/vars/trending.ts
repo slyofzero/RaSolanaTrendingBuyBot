@@ -1,6 +1,7 @@
 import { apiFetcher } from "@/utils/api";
 import { TRENDING_AUTH_KEY, TRENDING_TOKENS_API } from "@/utils/env";
 import { errorHandler, log } from "@/utils/handlers";
+import { syncPairsToWatch } from "./pairsToWatch";
 
 type TrendingTokens = { [key: string]: string };
 
@@ -25,6 +26,8 @@ export async function syncTrendingTokens() {
         Object.entries(trendingTokens).length
       } tokens`
     );
+
+    syncPairsToWatch();
   } catch (error) {
     errorHandler(error);
     trendingTokens = {};

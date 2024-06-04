@@ -2,8 +2,10 @@ import WebSocket from "ws";
 import { errorHandler, log } from "./utils/handlers";
 import { parseTxn } from "./parseTxn";
 
+export let currentWSS: WebSocket | null = null;
+
 export function setUpWSS(pairs: string[]) {
-  const ws = new WebSocket(
+  currentWSS = new WebSocket(
     "wss://atlas-mainnet.helius-rpc.com/?api-key=224786e4-f3e6-4a4b-bab2-f903872b1595"
   );
 
@@ -29,11 +31,12 @@ export function setUpWSS(pairs: string[]) {
   }
   // handle(network, signatures);
   // Define WebSocket event handlers
-  ws.on("open", function open() {
+  currentWSS.on("open", function open() {
     log("WebSocket is open");
-    sendRequest(ws); // Send a request once the WebSocket is open
+    if (currentWSS) sendRequest(currentWSS); // Send a request once the WebSocket is open
   });
-  ws.on("message", function incoming(data) {
+
+  currentWSS.on("message", function incoming(data) {
     const messageStr = data.toString("utf8");
     try {
       const messageObj = JSON.parse(messageStr);
@@ -50,16 +53,18 @@ export function setUpWSS(pairs: string[]) {
       errorHandler(err);
     }
   });
-  ws.on("error", function error(err) {
+
+  currentWSS.on("error", function error(err) {
     log("WebSocket error:");
     errorHandler(err);
   });
-  ws.on("close", (code, reason) => {
+
+  currentWSS.on("close", (code, reason) => {
     log(`Disconnected: ${code} - ${reason}`);
-    // Attempt to reconnect after a delay
-    setTimeout(() => {
-      log("Reconnecting...");
-      setUpWSS(pairs);
-    }, 1000); // Reconnect after 1 second
+    // // Attempt to reconnect after a delay
+    // setTimeout(() => {
+    //   log("Reconnecting...");
+    //   setUpWSS(pairs);
+    // }, 1000); // Reconnect after 1 second
   });
 }
