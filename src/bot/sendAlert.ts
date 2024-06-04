@@ -71,7 +71,7 @@ ${emojis}
 
     if (isTrending) {
       const trendingBuyAlertBot = getRandomItemFromArray(trendingBuyAlertBots);
-      console.log("here");
+
       trendingBuyAlertBot.api
         .sendMessage(TRENDING_CHANNEL_ID || "", message, {
           parse_mode: "MarkdownV2",
