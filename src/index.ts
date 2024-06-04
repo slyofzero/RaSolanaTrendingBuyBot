@@ -7,9 +7,7 @@ import { rpcConfig } from "./rpc/config";
 import { cleanUpExpired } from "./bot/cleanup";
 import { unlockUnusedAccounts } from "./bot/cleanup/account";
 import express from "express";
-import { syncProjectGroups } from "./vars/projectGroups";
 import { syncTrendingTokens } from "./vars/trending";
-import { sleep } from "./utils/time";
 
 if (!PORT) {
   log("PORT is undefined");
@@ -36,8 +34,6 @@ log("Bot instance ready");
   initiateCallbackQueries();
 
   await Promise.all([syncAdvertisements(), syncTrendingTokens()]);
-  await sleep(5000);
-  await syncProjectGroups();
 
   setInterval(unlockUnusedAccounts, 60 * 60 * 1e3);
   setInterval(cleanUpExpired, 60 * 1e3);
