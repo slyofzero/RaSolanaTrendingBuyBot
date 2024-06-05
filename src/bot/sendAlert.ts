@@ -1,10 +1,9 @@
 import { errorHandler, log } from "@/utils/handlers";
 import { memoTokenData } from "@/vars/tokens";
-import { teleBot, trendingBuyAlertBots } from "..";
+import { trendingBuyAlertBots } from "..";
 import { TRENDING_CHANNEL_ID } from "@/utils/env";
 import { trendingTokens } from "@/vars/trending";
 import { getRandomItemFromArray } from "@/utils/general";
-import { projectGroups } from "@/vars/projectGroups";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
 import { toTrendTokens } from "@/vars/toTrend";
 
@@ -19,12 +18,9 @@ export interface BuyData {
 export async function sendAlert(data: BuyData) {
   try {
     const { buyer, amount, token, signature, change } = data;
-    const groups = projectGroups.filter(
-      ({ token: groupToken }) => groupToken === token
-    );
     const isTrending = Object.keys(trendingTokens).includes(token);
     // console.log(isTrending, groups.length);
-    if (!isTrending && !groups.length) return;
+    if (!isTrending) return;
 
     // Preparing message for token
     const tokenData = memoTokenData[token];
@@ -107,12 +103,6 @@ ${emojis}
         console.log(message);
         errorHandler(error);
       }
-    }
-
-    for (const group of groups) {
-      return teleBot.api
-        .sendMessage(group.chatId, message)
-        .catch((e) => errorHandler(e));
     }
   } catch (error) {
     errorHandler(error);

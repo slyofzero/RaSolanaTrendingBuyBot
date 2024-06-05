@@ -1,7 +1,7 @@
 import { Bot } from "grammy";
-import { initiateBotCommands, initiateCallbackQueries } from "./bot";
-import { log, stopScript } from "./utils/handlers";
-import { BOT_TOKEN, PORT, TRENDING_BOT_TOKENS } from "./utils/env";
+// import { initiateBotCommands, initiateCallbackQueries } from "./bot";
+import { log } from "./utils/handlers";
+import { PORT, TRENDING_BOT_TOKENS } from "./utils/env";
 import { syncAdvertisements } from "./vars/advertisements";
 import { rpcConfig } from "./rpc/config";
 import { cleanUpExpired } from "./bot/cleanup";
@@ -16,11 +16,11 @@ if (!PORT) {
 
 const app = express();
 
-if (!BOT_TOKEN) {
-  stopScript("BOT_TOKEN is missing.");
-}
+// if (!BOT_TOKEN) {
+//   stopScript("BOT_TOKEN is missing.");
+// }
 
-export const teleBot = new Bot(BOT_TOKEN || "");
+// export const teleBot = new Bot(BOT_TOKEN || "");
 export const trendingBuyAlertBots = TRENDING_BOT_TOKENS.map(
   (token) => new Bot(token)
 );
@@ -28,10 +28,10 @@ log("Bot instance ready");
 
 (async function () {
   rpcConfig();
-  teleBot.start();
+  // teleBot.start();
   log("Telegram bot setup");
-  initiateBotCommands();
-  initiateCallbackQueries();
+  // initiateBotCommands();
+  // initiateCallbackQueries();
 
   await Promise.all([syncAdvertisements(), syncTrendingTokens()]);
 
