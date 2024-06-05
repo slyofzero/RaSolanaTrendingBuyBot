@@ -6,6 +6,7 @@ import { trendingTokens } from "@/vars/trending";
 import { getRandomItemFromArray } from "@/utils/general";
 import { projectGroups } from "@/vars/projectGroups";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
+import { toTrendTokens } from "@/vars/toTrend";
 
 export interface BuyData {
   buyer: string;
@@ -41,6 +42,10 @@ export async function sendAlert(data: BuyData) {
     const randomizeEmojiCount = (min: number, max: number) =>
       Math.floor(Math.random() * (max - min + 1)) + min;
 
+    const toTrendToken = toTrendTokens.find(
+      ({ token: storedToken }) => storedToken === token
+    );
+
     let emojiCount = 0;
     if (sentUsdNumber <= 50) {
       emojiCount = randomizeEmojiCount(5, 10);
@@ -49,7 +54,9 @@ export async function sendAlert(data: BuyData) {
     } else {
       emojiCount = randomizeEmojiCount(35, 70);
     }
-    const emojis = "🟢".repeat(emojiCount);
+    const emojis = `${toTrendToken ? toTrendToken.emoji : "🟢"}`.repeat(
+      emojiCount
+    );
 
     // links
     const buyerLink = `https://solscan.io/account/${buyer}`;
@@ -69,19 +76,37 @@ ${emojis}
 
 [DexT](${dexSLink}) \\| [Screener](${dexTLink}) \\| [Trending](${trendingLink})`;
 
+    // Sending Message
     if (isTrending) {
       const trendingBuyAlertBot = getRandomItemFromArray(trendingBuyAlertBots);
 
-      trendingBuyAlertBot.api
-        .sendMessage(TRENDING_CHANNEL_ID || "", message, {
-          parse_mode: "MarkdownV2",
-          // @ts-expect-error Type not found
-          disable_web_page_preview: true,
-        })
-        .catch((e) => {
-          console.log(message);
-          errorHandler(e);
-        });
+      try {
+        if (toTrendToken?.gif) {
+          await trendingBuyAlertBot.api.sendAnimation(
+            TRENDING_CHANNEL_ID || "",
+            toTrendToken.gif,
+            {
+              parse_mode: "MarkdownV2",
+              // @ts-expect-error Type not found
+              disable_web_page_preview: true,
+              caption: message,
+            }
+          );
+        } else {
+          await trendingBuyAlertBot.api.sendMessage(
+            TRENDING_CHANNEL_ID || "",
+            message,
+            {
+              parse_mode: "MarkdownV2",
+              // @ts-expect-error Type not found
+              disable_web_page_preview: true,
+            }
+          );
+        }
+      } catch (error) {
+        console.log(message);
+        errorHandler(error);
+      }
     }
 
     for (const group of groups) {
