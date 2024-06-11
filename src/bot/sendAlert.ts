@@ -27,7 +27,7 @@ export async function sendAlert(data: BuyData) {
     const { symbol } = tokenData.baseToken;
     const { priceNative, priceUsd, fdv, info } = tokenData;
     const sentUsdNumber = amount * Number(priceUsd);
-    if (sentUsdNumber < 1) return;
+    if (sentUsdNumber < 300) return;
     const sentNative = cleanUpBotMessage((amount * Number(priceNative)).toFixed(2)); // prettier-ignore
     const sentUsd = cleanUpBotMessage(sentUsdNumber.toFixed(2));
     const formattedAmount = cleanUpBotMessage(amount.toLocaleString("en"));
