@@ -1,7 +1,7 @@
 import { errorHandler, log } from "@/utils/handlers";
 import { memoTokenData } from "@/vars/tokens";
 import { trendingBuyAlertBots } from "..";
-import { TRENDING_CHANNEL_ID } from "@/utils/env";
+import { TRENDING_CHANNEL_ID, TRENDING_LINK } from "@/utils/env";
 import { trendingTokens } from "@/vars/trending";
 import { getRandomItemFromArray } from "@/utils/general";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
@@ -58,7 +58,6 @@ export async function sendAlert(data: BuyData) {
     const buyerLink = `https://solscan.io/account/${buyer}`;
     const txnLink = `https://solscan.io/tx/${signature}`;
     const dexSLink = `https://dexscreener.com/solana/7fdjh3zyup8ri6j8nglcpcxqsak8d9vbpab7pvibg4d1/${token}`;
-    const trendingLink = `https://t.me/c/2125443386/2`;
     const photonLink = `https://photon-sol.tinyastro.io/en/lp/${token}`;
 
     const telegramLink = info.socials.find(
@@ -78,7 +77,7 @@ ${emojis}
 🪙 Position ${hardCleanUpBotMessage(position)}
 💸 [Market Cap $${cleanUpBotMessage(fdv.toLocaleString("en"))}](${dexSLink})
 
-[Photon](${photonLink}) \\| ${specialLink} \\| [Trending](${trendingLink})`;
+[Photon](${photonLink}) \\| ${specialLink} \\| [Trending](${TRENDING_LINK})`;
 
     // Sending Message
     if (isTrending) {

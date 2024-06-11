@@ -29,6 +29,7 @@ export const {
   RPC_ENDPOINT,
   HELIS_API_KEY,
   WEBHOOK_URL,
+  TRENDING_LINK,
 } = process.env;
 
 export const TRENDING_BOT_TOKENS: string[] = JSON.parse(
