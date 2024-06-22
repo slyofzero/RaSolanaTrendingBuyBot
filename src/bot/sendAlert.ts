@@ -75,7 +75,7 @@ ${emojis}
 🔀 ${formattedAmount} *${hardCleanUpBotMessage(symbol)}*
 👤 [Buyer](${buyerLink}) \\| [Txn](${txnLink}  )
 🪙 Position ${hardCleanUpBotMessage(position)}
-💸 [Market Cap $${cleanUpBotMessage(fdv.toLocaleString("en"))}](${dexSLink})
+💸 [Market Cap](${dexSLink}) $${cleanUpBotMessage(fdv.toLocaleString("en"))}
 
 [Photon](${photonLink}) \\| ${specialLink} \\| [Trending](${TRENDING_LINK})`;
 
