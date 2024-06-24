@@ -4,8 +4,6 @@ import { log } from "./utils/handlers";
 import { PORT, TRENDING_BOT_TOKENS } from "./utils/env";
 import { syncAdvertisements } from "./vars/advertisements";
 import { rpcConfig } from "./rpc/config";
-import { cleanUpExpired } from "./bot/cleanup";
-import { unlockUnusedAccounts } from "./bot/cleanup/account";
 import express from "express";
 import { syncTrendingTokens } from "./vars/trending";
 
@@ -35,13 +33,16 @@ log("Bot instance ready");
 
   await Promise.all([syncAdvertisements(), syncTrendingTokens()]);
 
-  setInterval(unlockUnusedAccounts, 60 * 60 * 1e3);
-  setInterval(cleanUpExpired, 60 * 1e3);
+  // setInterval(unlockUnusedAccounts, 60 * 60 * 1e3);
+  // setInterval(cleanUpExpired, 60 * 1e3);
 
   app.use(express.json());
 
   app.get("/ping", (req, res) => res.send({ message: "Server up" }));
-  app.post("/syncTrending", () => syncTrendingTokens());
+  app.post("/syncTrending", () => {
+    log(`Received sync request`);
+    syncTrendingTokens();
+  });
 
   app.listen(PORT, () => {
     log(`Server is running on port ${PORT}`);
