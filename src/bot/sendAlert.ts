@@ -77,7 +77,7 @@ ${emojis}
 🪙 Position ${hardCleanUpBotMessage(position)}
 💸 [Market Cap](${dexSLink}) $${cleanUpBotMessage(fdv.toLocaleString("en"))}
 
-[Photon](${photonLink}) \\| ${specialLink} \\| [Trending](${TRENDING_LINK})`;
+[DexS](${dexSLink}) \\| [Photon](${photonLink}) \\| ${specialLink} \\| [Trending](${TRENDING_LINK})`;
 
     // Sending Message
     if (isTrending) {
