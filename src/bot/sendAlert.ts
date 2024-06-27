@@ -6,6 +6,7 @@ import { trendingTokens } from "@/vars/trending";
 import { getRandomItemFromArray } from "@/utils/general";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
 import { toTrendTokens } from "@/vars/toTrend";
+import { advertisements } from "@/vars/advertisements";
 
 export interface BuyData {
   buyer: string;
@@ -59,6 +60,15 @@ export async function sendAlert(data: BuyData) {
     const txnLink = `https://solscan.io/tx/${signature}`;
     const dexSLink = `https://dexscreener.com/solana/7fdjh3zyup8ri6j8nglcpcxqsak8d9vbpab7pvibg4d1/${token}`;
     const photonLink = `https://photon-sol.tinyastro.io/en/lp/${token}`;
+    const advertisement = advertisements.at(0);
+    let advertisementText = "";
+
+    if (advertisement) {
+      const { text, link } = advertisement;
+      advertisementText = `*_Ad: [${text}](${link})_*`;
+    } else {
+      advertisementText = `*_Ad: [Place your advertisement here](https://t.me/RaSolanaTrendingBot?start=adBuyRequest)_*`;
+    }
 
     const telegramLink = info.socials.find(
       ({ type }) => type.toLowerCase() === "telegram"
@@ -77,7 +87,9 @@ ${emojis}
 🪙 Position ${hardCleanUpBotMessage(position)}
 💸 [Market Cap](${dexSLink}) $${cleanUpBotMessage(fdv.toLocaleString("en"))}
 
-[DexS](${dexSLink}) \\| [Photon](${photonLink}) \\| ${specialLink} \\| [Trending](${TRENDING_LINK})`;
+[DexS](${dexSLink}) \\| [Photon](${photonLink}) \\| ${specialLink} \\| [Trending](${TRENDING_LINK})
+
+${advertisementText}`;
 
     // Sending Message
     if (isTrending) {

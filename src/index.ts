@@ -44,6 +44,11 @@ log("Bot instance ready");
     syncTrendingTokens();
   });
 
+  app.post("/syncAds", () => {
+    log(`Received sync request`);
+    syncAdvertisements();
+  });
+
   app.listen(PORT, () => {
     log(`Server is running on port ${PORT}`);
   });
