@@ -57,6 +57,7 @@ export function setUpWSS(pairs: string[]) {
   currentWSS.on("error", function error(err) {
     log("WebSocket error:");
     errorHandler(err);
+    process.exit(1);
   });
 
   currentWSS.on("close", (code, reason) => {
