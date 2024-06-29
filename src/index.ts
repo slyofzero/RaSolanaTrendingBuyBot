@@ -5,7 +5,8 @@ import { PORT, TRENDING_BOT_TOKENS } from "./utils/env";
 import { syncAdvertisements } from "./vars/advertisements";
 import { rpcConfig } from "./rpc/config";
 import express from "express";
-import { syncTrendingTokens } from "./vars/trending";
+import { syncTrendingTokens, trendingTokens } from "./vars/trending";
+import { memoizeTokenData } from "./vars/tokens";
 
 if (!PORT) {
   log("PORT is undefined");
@@ -34,7 +35,7 @@ log("Bot instance ready");
   await Promise.all([syncAdvertisements(), syncTrendingTokens()]);
 
   // setInterval(unlockUnusedAccounts, 60 * 60 * 1e3);
-  // setInterval(cleanUpExpired, 60 * 1e3);
+  setInterval(() => memoizeTokenData(Object.keys(trendingTokens)), 60 * 1e3);
 
   app.use(express.json());
 
