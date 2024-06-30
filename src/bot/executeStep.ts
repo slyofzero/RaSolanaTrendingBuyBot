@@ -14,6 +14,7 @@ import {
   selectAdDuration,
 } from "./commands/advertise";
 import { log } from "@/utils/handlers";
+import { selectEmoji, setEmoji } from "./commands/setEmojis";
 
 const steps: { [key: string]: any } = {
   toTrend: addTrendingSocial,
@@ -31,6 +32,9 @@ const steps: { [key: string]: any } = {
   adDuration: prepareAdvertisementState,
   adSlot: preparePayment,
   adPayment: confirmPayment,
+
+  setEmoji,
+  selectEmoji,
 };
 
 export async function executeStep(

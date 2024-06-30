@@ -7,6 +7,7 @@ import { getRandomItemFromArray } from "@/utils/general";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
 import { toTrendTokens } from "@/vars/toTrend";
 import { advertisements } from "@/vars/advertisements";
+import { tokenEmojis } from "@/vars/tokenEmojis";
 
 export interface BuyData {
   buyer: string;
@@ -51,9 +52,9 @@ export async function sendAlert(data: BuyData) {
     } else {
       emojiCount = randomizeEmojiCount(35, 70);
     }
-    const emojis = `${toTrendToken ? toTrendToken.emoji : "🟢"}`.repeat(
-      emojiCount
-    );
+    const emojis = `${
+      toTrendToken ? toTrendToken.emoji : `${tokenEmojis[token] || "🟢"}`
+    }`.repeat(emojiCount);
 
     // links
     const buyerLink = `https://solscan.io/account/${buyer}`;
