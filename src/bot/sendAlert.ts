@@ -71,7 +71,7 @@ export async function sendAlert(data: BuyData) {
       advertisementText = `*_Ad: [Place your advertisement here](https://t.me/RaSolanaTrendingBot?start=adBuyRequest)_*`;
     }
 
-    const telegramLink = info.socials.find(
+    const telegramLink = info?.socials?.find(
       ({ type }) => type.toLowerCase() === "telegram"
     )?.url;
 
