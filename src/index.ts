@@ -34,9 +34,7 @@ log("Bot instance ready");
   initiateCallbackQueries();
 
   await Promise.all([syncAdvertisements(), syncTrendingTokens()]);
-
-  // setInterval(unlockUnusedAccounts, 60 * 60 * 1e3);
-  setInterval(() => memoizeTokenData(Object.keys(trendingTokens)), 60 * 1e3);
+  memoizeTokenData(Object.keys(trendingTokens));
 
   app.use(express.json());
 
