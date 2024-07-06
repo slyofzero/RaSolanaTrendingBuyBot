@@ -33,8 +33,8 @@ log("Bot instance ready");
   initiateBotCommands();
   initiateCallbackQueries();
 
+  await memoizeTokenData(Object.keys(trendingTokens));
   await Promise.all([syncAdvertisements(), syncTrendingTokens()]);
-  memoizeTokenData(Object.keys(trendingTokens));
 
   app.use(express.json());
 
