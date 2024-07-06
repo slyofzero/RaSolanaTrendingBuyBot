@@ -33,7 +33,7 @@ export async function memoizeTokenData(tokens: string[]) {
     ({ pairAddress }) => pairAddress
   );
   setPairsToWatch(newPairsToWatch);
-  await sleep(60 * 1000);
+  await sleep(60 * 1e3);
 
   memoizeTokenData(Object.keys(trendingTokens));
 }
