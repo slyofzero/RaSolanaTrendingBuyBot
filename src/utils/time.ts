@@ -13,3 +13,9 @@ export function getNowTimestamp() {
 export function getSecondsElapsed(timestamp: number) {
   return getNowTimestamp() - timestamp;
 }
+
+export async function recurse(func: any, ms: number) {
+  await sleep(ms);
+  await func();
+  recurse(func, ms);
+}

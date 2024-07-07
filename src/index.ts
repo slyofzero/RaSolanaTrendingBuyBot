@@ -8,6 +8,8 @@ import express from "express";
 import { syncTrendingTokens, trendingTokens } from "./vars/trending";
 import { memoizeTokenData } from "./vars/tokens";
 import { initiateBotCommands, initiateCallbackQueries } from "./bot";
+import { recurse } from "./utils/time";
+import { projectGroups } from "./vars/projectGroups";
 
 if (!PORT) {
   log("PORT is undefined");
@@ -35,6 +37,13 @@ log("Bot instance ready");
 
   await memoizeTokenData(Object.keys(trendingTokens));
   await Promise.all([syncAdvertisements(), syncTrendingTokens()]);
+
+  // Recurse functions
+  recurse(
+    async () => await memoizeTokenData(projectGroups.map(({ token }) => token)),
+    15 * 1e3
+  );
+  recurse(async () => await syncTrendingTokens(), 15 * 1e3);
 
   app.use(express.json());
 
