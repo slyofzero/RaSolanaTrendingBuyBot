@@ -8,7 +8,6 @@ import express from "express";
 import { syncTrendingTokens, trendingTokens } from "./vars/trending";
 import { memoizeTokenData } from "./vars/tokens";
 import { initiateBotCommands, initiateCallbackQueries } from "./bot";
-import { recurse } from "./utils/time";
 import { projectGroups } from "./vars/projectGroups";
 
 if (!PORT) {
@@ -39,7 +38,7 @@ log("Bot instance ready");
   await Promise.all([syncAdvertisements(), syncTrendingTokens()]);
 
   // Recurse functions
-  recurse(
+  setInterval(
     async () => await memoizeTokenData(projectGroups.map(({ token }) => token)),
     60 * 1e3
   );
