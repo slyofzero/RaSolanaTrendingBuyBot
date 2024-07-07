@@ -59,7 +59,7 @@ export async function sendAlert(data: BuyData) {
     // links
     const buyerLink = `https://solscan.io/account/${buyer}`;
     const txnLink = `https://solscan.io/tx/${signature}`;
-    const dexSLink = `https://dexscreener.com/solana/7fdjh3zyup8ri6j8nglcpcxqsak8d9vbpab7pvibg4d1/${token}`;
+    const dexSLink = `https://dexscreener.com/solana/${token}`;
     const photonLink = `https://photon-sol.tinyastro.io/en/lp/${token}`;
     const advertisement = advertisements.at(0);
     let advertisementText = "";
