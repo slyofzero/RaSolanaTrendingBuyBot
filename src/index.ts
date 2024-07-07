@@ -41,9 +41,8 @@ log("Bot instance ready");
   // Recurse functions
   recurse(
     async () => await memoizeTokenData(projectGroups.map(({ token }) => token)),
-    15 * 1e3
+    60 * 1e3
   );
-  recurse(async () => await syncTrendingTokens(), 15 * 1e3);
 
   app.use(express.json());
 
