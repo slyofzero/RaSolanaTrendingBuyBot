@@ -62,11 +62,13 @@ export function setUpWSS(pairs: string[]) {
 
   currentWSS.on("close", (code, reason) => {
     log(`Disconnected: ${code} - ${reason}`);
-    // process.exit(1);
-    // // Attempt to reconnect after a delay
-    // setTimeout(() => {
-    //   log("Reconnecting...");
-    //   setUpWSS(pairs);
-    // }, 1000); // Reconnect after 1 second
+
+    if (code === 4200) {
+      // Attempt to reconnect after a delay
+      setTimeout(() => {
+        log("Reconnecting...");
+        setUpWSS(pairs);
+      }, 1000); // Reconnect after 1 second
+    }
   });
 }
