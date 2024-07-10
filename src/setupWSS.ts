@@ -71,6 +71,8 @@ export function setUpWSS(pairs: string[]) {
         log("Reconnecting...");
         setUpWSS(pairs);
       }, 1000); // Reconnect after 1 second
+    } else {
+      process.exit(1);
     }
   });
 }
