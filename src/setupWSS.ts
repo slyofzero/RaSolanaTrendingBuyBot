@@ -51,6 +51,8 @@ export function setUpWSS(pairs: string[]) {
     } catch (err) {
       log("Failed to parse JSON:");
       errorHandler(err);
+      log("Reset WSS");
+      currentWSS?.close(4200, "Reset WSS");
     }
   });
 
