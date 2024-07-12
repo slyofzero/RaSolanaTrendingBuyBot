@@ -2,7 +2,9 @@ import { log } from "@/utils/handlers";
 import { trendingTokens } from "./trending";
 import { projectGroups } from "./projectGroups";
 import { currentWSS, setUpWSS } from "@/setupWSS";
-import { memoizeTokenData } from "./tokens";
+import { memoizeTokenData, memoTokenData } from "./tokens";
+import { teleBot } from "..";
+import { LOGS_CHANNEL_ID } from "@/utils/env";
 
 export let pairsToWatch: string[] = [];
 export let tokensToWatch: string[] = [];
@@ -24,6 +26,17 @@ export async function syncPairsToWatch() {
   }
 
   await memoizeTokenData(tokensToWatch);
+
+  let memoizedTokenLog = Object.values(memoTokenData)
+    .map(({ baseToken }) => {
+      const { name, symbol } = baseToken;
+      return `${symbol} | ${name}`;
+    })
+    .join("\n");
+
+  memoizedTokenLog = `Tokens currently being watched - ${memoTokenData}`;
+  teleBot.api.sendMessage(LOGS_CHANNEL_ID || "", memoizedTokenLog);
+
   setUpWSS(pairsToWatch);
   log(`Synced all pairs to watch`);
 }

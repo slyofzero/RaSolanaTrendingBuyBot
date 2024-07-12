@@ -5,7 +5,7 @@ import { BOT_TOKEN, PORT, TRENDING_BOT_TOKENS } from "./utils/env";
 import { syncAdvertisements } from "./vars/advertisements";
 import { rpcConfig } from "./rpc/config";
 import express from "express";
-import { syncTrendingTokens, trendingTokens } from "./vars/trending";
+import { syncTrendingTokens } from "./vars/trending";
 import { memoizeTokenData } from "./vars/tokens";
 import { initiateBotCommands, initiateCallbackQueries } from "./bot";
 import { projectGroups } from "./vars/projectGroups";
@@ -34,7 +34,6 @@ log("Bot instance ready");
   initiateBotCommands();
   initiateCallbackQueries();
 
-  await memoizeTokenData(Object.keys(trendingTokens));
   await Promise.all([syncAdvertisements(), syncTrendingTokens()]);
 
   // Recurse functions

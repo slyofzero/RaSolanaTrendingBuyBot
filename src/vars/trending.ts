@@ -1,8 +1,13 @@
 import { apiFetcher } from "@/utils/api";
-import { TRENDING_AUTH_KEY, TRENDING_TOKENS_API } from "@/utils/env";
+import {
+  LOGS_CHANNEL_ID,
+  TRENDING_AUTH_KEY,
+  TRENDING_TOKENS_API,
+} from "@/utils/env";
 import { errorHandler, log } from "@/utils/handlers";
 import { syncPairsToWatch } from "./pairsToWatch";
 import { syncToTrend } from "./toTrend";
+import { teleBot } from "..";
 
 type TrendingTokens = { [key: string]: string };
 
@@ -22,11 +27,12 @@ export async function syncTrendingTokens() {
 
     trendingTokens = newTrendingTokens;
 
-    log(
-      `Getting trending pairs data, got ${
-        Object.entries(trendingTokens).length
-      } tokens`
-    );
+    const logText = `Getting trending pairs data, got ${
+      Object.entries(trendingTokens).length
+    } tokens`;
+
+    log(logText);
+    teleBot.api.sendMessage(LOGS_CHANNEL_ID || "", logText);
 
     syncToTrend();
     syncPairsToWatch();
