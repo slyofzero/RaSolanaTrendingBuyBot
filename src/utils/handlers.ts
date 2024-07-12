@@ -15,11 +15,11 @@ export function stopScript(message: string, exitCode?: number) {
 
 export function errorHandler(e: unknown, showStack?: boolean) {
   const error = e as Error;
-  log(`Error: ${error.message}`);
   if (showStack) log(error.stack);
 
   const errorCode = nanoid();
   const errorText = `Error - ${errorCode}\n${error.message}`;
+  log(errorText);
 
   teleBot.api.sendMessage(LOGS_CHANNEL_ID || "", errorText);
 }
