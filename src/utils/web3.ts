@@ -3,7 +3,6 @@ import { ethers } from "ethers";
 import nacl from "tweetnacl";
 import { errorHandler, log } from "./handlers";
 import { solanaConnection } from "@/rpc/config";
-import { splitPaymentsWith } from "./constants";
 
 export function isValidSolAddress(address: string) {
   try {
@@ -72,28 +71,6 @@ export async function sendTransaction(
       sendTransaction(secretKey, amount, to);
     }
   }
-}
-
-export async function splitPayment(
-  secretKey: string,
-  totalPaymentAmount: number
-) {
-  const { dev, revenue, main } = splitPaymentsWith;
-  const devShare = Math.ceil(totalPaymentAmount * dev.share);
-  const revenueShare = Math.floor(totalPaymentAmount * revenue.share);
-  const mainShare = totalPaymentAmount - (devShare + revenueShare);
-
-  sendTransaction(secretKey, devShare, dev.address).then((sig) =>
-    log(`Fees of ${devShare} lamports sent to account ${sig}`)
-  );
-
-  sendTransaction(secretKey, revenueShare, revenue.address).then((sig) =>
-    log(`Fees of ${revenueShare} lamports sent to account ${sig}`)
-  );
-
-  sendTransaction(secretKey, mainShare, main.address).then((sig) =>
-    log(`Fees of ${mainShare} lamports sent to account ${sig}`)
-  );
 }
 
 export async function getTokenBalance(ownerAddress: string, token: string) {
