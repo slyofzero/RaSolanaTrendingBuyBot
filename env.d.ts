@@ -2,10 +2,10 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       RPC_ENDPOINT: string | undefined;
-      TRENDING_MSG: string | undefined;
       TRENDING_TOKENS_API: string | undefined;
       TRENDING_AUTH_KEY: string | undefined;
       BOT_TOKEN: string | undefined;
+      TRENDING_CHANNEL_LINK: string | undefined;
       BOT_USERNAME: string | undefined;
       TRENDING_BOT_USERNAME: string | undefined;
       TRENDING_CHANNEL_ID: string | undefined;

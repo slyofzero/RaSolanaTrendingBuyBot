@@ -9,6 +9,7 @@ import { syncTrendingTokens } from "./vars/trending";
 import { memoizeTokenData } from "./vars/tokens";
 import { initiateBotCommands, initiateCallbackQueries } from "./bot";
 import { projectGroups } from "./vars/projectGroups";
+import { syncTrendingMessageId } from "./vars/message";
 
 if (!PORT) {
   log("PORT is undefined");
@@ -34,13 +35,19 @@ log("Bot instance ready");
   initiateBotCommands();
   initiateCallbackQueries();
 
-  await Promise.all([syncAdvertisements(), syncTrendingTokens()]);
+  await Promise.all([
+    syncAdvertisements(),
+    syncTrendingTokens(),
+    syncTrendingMessageId(),
+  ]);
 
   // Recurse functions
-  setInterval(
-    async () => await memoizeTokenData(projectGroups.map(({ token }) => token)),
-    60 * 1e3
-  );
+  setInterval(async () => {
+    await Promise.all([
+      memoizeTokenData(projectGroups.map(({ token }) => token)),
+      syncTrendingMessageId(),
+    ]);
+  }, 60 * 1e3);
 
   app.use(express.json());
 
