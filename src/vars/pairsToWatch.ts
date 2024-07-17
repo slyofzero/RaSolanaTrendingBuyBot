@@ -34,7 +34,7 @@ export async function syncPairsToWatch() {
     })
     .join("\n");
 
-  memoizedTokenLog = `Tokens currently being watched - ${memoizedTokenLog}`;
+  memoizedTokenLog = `Tokens currently being watched - \n\n${memoizedTokenLog}`;
   teleBot.api.sendMessage(LOGS_CHANNEL_ID || "", memoizedTokenLog);
 
   setUpWSS(pairsToWatch);
