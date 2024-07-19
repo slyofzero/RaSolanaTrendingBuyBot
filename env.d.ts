@@ -10,6 +10,7 @@ declare global {
       TRENDING_BOT_USERNAME: string | undefined;
       TRENDING_CHANNEL_ID: string | undefined;
       ENCRYPTION_KEY: string | undefined;
+      TRENDING_CHANNEL_LINK: string | undefined;
       PORT: string | undefined;
       LOGS_CHANNEL_ID: string | undefined;
       TRENDING_BOT_TOKENS: string | undefined;

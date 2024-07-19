@@ -18,6 +18,7 @@ export const {
   TRENDING_TOKENS_API,
   FIREBASE_KEY,
   TRENDING_CHANNEL,
+  TRENDING_CHANNEL_LINK,
 } = process.env;
 
 export const TRENDING_BOT_TOKENS: string[] = JSON.parse(

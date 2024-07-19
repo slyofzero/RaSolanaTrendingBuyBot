@@ -1,7 +1,7 @@
 import { errorHandler, log } from "@/utils/handlers";
 import { memoTokenData } from "@/vars/tokens";
 import { trendingBuyAlertBots } from "..";
-import { TRENDING_CHANNEL_ID } from "@/utils/env";
+import { TRENDING_CHANNEL_ID, TRENDING_CHANNEL_LINK } from "@/utils/env";
 import { trendingTokens } from "@/vars/trending";
 import { getRandomItemFromArray } from "@/utils/general";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
@@ -90,7 +90,7 @@ ${emojis}
 🪙 Position ${hardCleanUpBotMessage(position)}
 💸 [Market Cap](${dexSLink}) $${cleanUpBotMessage(fdv.toLocaleString("en"))}
 
-[DexS](${dexSLink}) \\| [Photon](${photonLink}) \\| ${specialLink} \\| [Trending](${trendingMessageId})
+[DexS](${dexSLink}) \\| [Photon](${photonLink}) \\| ${specialLink} \\| [Trending](${TRENDING_CHANNEL_LINK}/${trendingMessageId})
 
 ${advertisementText}`;
 
