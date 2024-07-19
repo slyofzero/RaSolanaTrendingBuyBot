@@ -8,7 +8,8 @@ import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
 import { toTrendTokens } from "@/vars/toTrend";
 import { advertisements } from "@/vars/advertisements";
 import { tokenEmojis } from "@/vars/tokenEmojis";
-import { buyLimit, TRENDING_MSG } from "@/utils/constants";
+import { buyLimit } from "@/utils/constants";
+import { trendingMessageId } from "@/vars/message";
 
 export interface BuyData {
   buyer: string;
@@ -89,7 +90,7 @@ ${emojis}
 🪙 Position ${hardCleanUpBotMessage(position)}
 💸 [Market Cap](${dexSLink}) $${cleanUpBotMessage(fdv.toLocaleString("en"))}
 
-[DexS](${dexSLink}) \\| [Photon](${photonLink}) \\| ${specialLink} \\| [Trending](${TRENDING_MSG})
+[DexS](${dexSLink}) \\| [Photon](${photonLink}) \\| ${specialLink} \\| [Trending](${trendingMessageId})
 
 ${advertisementText}`;
 
