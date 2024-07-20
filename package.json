@@ -4,9 +4,9 @@
   "description": "",
   "main": "./src/index.ts",
   "scripts": {
-    "dev": "nodemon --exec ts-node -r tsconfig-paths/register .",
+    "dev": "cross-env NODE_ENV=development nodemon --exec ts-node -r tsconfig-paths/register .",
     "build": "tsc",
-    "start": "ts-node -r tsconfig-paths/register src/index.ts"
+    "start": "cross-env NODE_ENV=production ts-node -r tsconfig-paths/register src/index.ts"
   },
   "nodemonConfig": {
     "execMap": {
@@ -22,6 +22,7 @@
     "@types/ws": "^8.5.10",
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
+    "cross-env": "^7.0.3",
     "eslint": "^8.55.0",
     "nodemon": "^3.0.2",
     "ts-node": "^10.9.1",
