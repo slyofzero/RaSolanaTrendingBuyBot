@@ -5,10 +5,9 @@ import { BOT_TOKEN, PORT, TRENDING_BOT_TOKENS } from "./utils/env";
 import { syncAdvertisements } from "./vars/advertisements";
 import { rpcConfig } from "./rpc/config";
 import express from "express";
-import { syncTrendingTokens } from "./vars/trending";
+import { syncTrendingTokens, trendingTokens } from "./vars/trending";
 import { memoizeTokenData } from "./vars/tokens";
 import { initiateBotCommands, initiateCallbackQueries } from "./bot";
-import { projectGroups } from "./vars/projectGroups";
 import { syncTrendingMessageId } from "./vars/message";
 
 if (!PORT) {
@@ -44,7 +43,7 @@ log("Bot instance ready");
   // Recurse functions
   setInterval(async () => {
     await Promise.all([
-      memoizeTokenData(projectGroups.map(({ token }) => token)),
+      memoizeTokenData(Object.keys(trendingTokens)),
       syncTrendingMessageId(),
     ]);
   }, 60 * 1e3);
