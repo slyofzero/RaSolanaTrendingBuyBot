@@ -19,6 +19,7 @@ export const {
   FIREBASE_KEY,
   TRENDING_CHANNEL,
   TRENDING_CHANNEL_LINK,
+  GYSER_WSS_URL,
 } = process.env;
 
 export const TRENDING_BOT_TOKENS: string[] = JSON.parse(
