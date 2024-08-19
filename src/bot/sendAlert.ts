@@ -1,7 +1,11 @@
 import { errorHandler, log } from "@/utils/handlers";
 import { memoTokenData } from "@/vars/tokens";
 import { trendingBuyAlertBots } from "..";
-import { TRENDING_CHANNEL_ID, TRENDING_CHANNEL_LINK } from "@/utils/env";
+import {
+  TRENDING_BOT_USERNAME,
+  TRENDING_CHANNEL_ID,
+  TRENDING_CHANNEL_LINK,
+} from "@/utils/env";
 import { trendingTokens } from "@/vars/trending";
 import { getRandomItemFromArray } from "@/utils/general";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
@@ -70,7 +74,7 @@ export async function sendAlert(data: BuyData) {
       const { text, link } = advertisement;
       advertisementText = `*_Ad: [${text}](${link})_*`;
     } else {
-      advertisementText = `*_Ad: [Place your advertisement here](https://t.me/RaSolanaTrendingBot?start=adBuyRequest)_*`;
+      advertisementText = `*_Ad: [Place your advertisement here](https://t.me/${TRENDING_BOT_USERNAME}?start=adBuyRequest)_*`;
     }
 
     const telegramLink = info?.socials?.find(
