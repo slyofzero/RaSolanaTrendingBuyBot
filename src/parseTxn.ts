@@ -1,6 +1,9 @@
 import { BuyData, sendAlert } from "./bot/sendAlert";
 import { TransactionNotification } from "./types";
 import { memoTokenData } from "./vars/tokens";
+import { trendingTokens } from "./vars/trending";
+
+const lastAlertTime: { [key: string]: number } = {};
 
 export async function parseTxn(data: TransactionNotification) {
   const { transaction: transactionResult, signature } = data.params.result;
@@ -22,6 +25,14 @@ export async function parseTxn(data: TransactionNotification) {
     const token = Object.keys(memoTokenData).find((token) => token === mint);
     if (!token) continue;
 
+    const currentTime = Date.now();
+    if (lastAlertTime[token] && currentTime - lastAlertTime[token] < 60 * 1e3) {
+      continue; // Skip if the last alert was sent less than 60 seconds ago
+    }
+
+    const isTrending = Object.keys(trendingTokens).includes(token);
+    if (!isTrending) continue;
+
     const preBalance = uiTokenAmount.uiAmount;
     const postBalances = postTokenBalances.filter(
       ({ owner: postOwner, mint }) => postOwner === owner && mint === token
@@ -42,6 +53,8 @@ export async function parseTxn(data: TransactionNotification) {
           change,
           signature,
         };
+
+        lastAlertTime[token] = currentTime;
 
         sendAlert(buyData);
       }

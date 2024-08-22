@@ -6,7 +6,6 @@ import {
   TRENDING_CHANNEL_ID,
   TRENDING_CHANNEL_LINK,
 } from "@/utils/env";
-import { trendingTokens } from "@/vars/trending";
 import { getRandomItemFromArray } from "@/utils/general";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
 import { toTrendTokens } from "@/vars/toTrend";
@@ -26,9 +25,6 @@ export interface BuyData {
 export async function sendAlert(data: BuyData) {
   try {
     const { buyer, amount, token, signature, change } = data;
-    const isTrending = Object.keys(trendingTokens).includes(token);
-    // console.log(isTrending, groups.length);
-    if (!isTrending) return;
 
     // Preparing message for token
     const tokenData = memoTokenData[token];
@@ -99,36 +95,34 @@ ${emojis}
 ${advertisementText}`;
 
     // Sending Message
-    if (isTrending) {
-      const trendingBuyAlertBot = getRandomItemFromArray(trendingBuyAlertBots);
+    const trendingBuyAlertBot = getRandomItemFromArray(trendingBuyAlertBots);
 
-      try {
-        if (toTrendToken?.gif) {
-          await trendingBuyAlertBot.api.sendAnimation(
-            TRENDING_CHANNEL_ID || "",
-            toTrendToken.gif,
-            {
-              parse_mode: "MarkdownV2",
-              // @ts-expect-error Type not found
-              disable_web_page_preview: true,
-              caption: message,
-            }
-          );
-        } else {
-          await trendingBuyAlertBot.api.sendMessage(
-            TRENDING_CHANNEL_ID || "",
-            message,
-            {
-              parse_mode: "MarkdownV2",
-              // @ts-expect-error Type not found
-              disable_web_page_preview: true,
-            }
-          );
-        }
-      } catch (error) {
-        console.log(message);
-        errorHandler(error);
+    try {
+      if (toTrendToken?.gif) {
+        await trendingBuyAlertBot.api.sendAnimation(
+          TRENDING_CHANNEL_ID || "",
+          toTrendToken.gif,
+          {
+            parse_mode: "MarkdownV2",
+            // @ts-expect-error Type not found
+            disable_web_page_preview: true,
+            caption: message,
+          }
+        );
+      } else {
+        await trendingBuyAlertBot.api.sendMessage(
+          TRENDING_CHANNEL_ID || "",
+          message,
+          {
+            parse_mode: "MarkdownV2",
+            // @ts-expect-error Type not found
+            disable_web_page_preview: true,
+          }
+        );
       }
+    } catch (error) {
+      console.log(message);
+      errorHandler(error);
     }
   } catch (error) {
     errorHandler(error);
