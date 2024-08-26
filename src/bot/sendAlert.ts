@@ -1,12 +1,11 @@
 import { errorHandler, log } from "@/utils/handlers";
 import { memoTokenData } from "@/vars/tokens";
-import { trendingBuyAlertBots } from "..";
+import { trendingBuyAlertBot } from "..";
 import {
   TRENDING_BOT_USERNAME,
   TRENDING_CHANNEL_ID,
   TRENDING_CHANNEL_LINK,
 } from "@/utils/env";
-import { getRandomItemFromArray } from "@/utils/general";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
 import { toTrendTokens } from "@/vars/toTrend";
 import { advertisements } from "@/vars/advertisements";
@@ -93,9 +92,6 @@ ${emojis}
 [DexS](${dexSLink}) \\| [Photon](${photonLink}) \\| ${specialLink} \\| [Trending](${TRENDING_CHANNEL_LINK}/${trendingMessageId})
 
 ${advertisementText}`;
-
-    // Sending Message
-    const trendingBuyAlertBot = getRandomItemFromArray(trendingBuyAlertBots);
 
     try {
       if (toTrendToken?.gif) {

@@ -20,8 +20,5 @@ export const {
   TRENDING_CHANNEL,
   TRENDING_CHANNEL_LINK,
   GYSER_WSS_URL,
+  TRENDING_BOT_TOKENS,
 } = process.env;
-
-export const TRENDING_BOT_TOKENS: string[] = JSON.parse(
-  process.env.TRENDING_BOT_TOKENS || "[]"
-);

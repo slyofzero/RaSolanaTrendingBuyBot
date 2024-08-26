@@ -22,9 +22,7 @@ if (!BOT_TOKEN) {
 }
 
 export const teleBot = new Bot(BOT_TOKEN || "");
-export const trendingBuyAlertBots = TRENDING_BOT_TOKENS.map(
-  (token) => new Bot(token)
-);
+export const trendingBuyAlertBot = new Bot(TRENDING_BOT_TOKENS || "");
 log("Bot instance ready");
 
 (async function () {
