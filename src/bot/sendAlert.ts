@@ -10,7 +10,6 @@ import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
 import { toTrendTokens } from "@/vars/toTrend";
 import { advertisements } from "@/vars/advertisements";
 import { tokenEmojis } from "@/vars/tokenEmojis";
-import { buyLimit } from "@/utils/constants";
 import { trendingMessageId } from "@/vars/message";
 
 export interface BuyData {
@@ -30,7 +29,7 @@ export async function sendAlert(data: BuyData) {
     const { symbol } = tokenData.baseToken;
     const { priceNative, priceUsd, fdv, info } = tokenData;
     const sentUsdNumber = amount * Number(priceUsd);
-    if (sentUsdNumber < buyLimit) return;
+
     const sentNative = cleanUpBotMessage((amount * Number(priceNative)).toFixed(2)); // prettier-ignore
     const sentUsd = cleanUpBotMessage(sentUsdNumber.toFixed(2));
     const formattedAmount = cleanUpBotMessage(amount.toLocaleString("en"));
