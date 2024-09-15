@@ -79,7 +79,9 @@ export async function sendAlert(data: BuyData) {
       ? `[Telegram](${telegramLink})`
       : `[Screener](${dexSLink})`;
 
-    const message = `*[${symbol}](${telegramLink || dexSLink}) Buy\\!*
+    const message = `*[${hardCleanUpBotMessage(symbol)}](${
+      telegramLink || dexSLink
+    }) Buy\\!*
 ${emojis}
 
 🔀 ${sentNative} SOL *\\($${sentUsd}\\)*
