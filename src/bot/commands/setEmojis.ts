@@ -1,7 +1,7 @@
 import { getDocument } from "@/firebase";
 import { StoredAdmins } from "@/types";
 import { userState } from "@/vars/state";
-import { tokenEmojiState, tokenEmojis } from "@/vars/tokenEmojis";
+import { TokenEmojis, tokenEmojiState, tokenEmojis } from "@/vars/tokenEmojis";
 import { memoTokenData } from "@/vars/tokens";
 import { trendingTokens } from "@/vars/trending";
 import {
@@ -10,10 +10,28 @@ import {
   Context,
   InlineKeyboard,
 } from "grammy";
+import { promises as fs } from "fs";
+import path from "path";
+
+const emojiJson = path.join(__dirname, "../../../", "emojis.json");
 
 export async function setEmojis(ctx: CommandContext<Context>) {
   const username = ctx.from?.username;
   if (!username) return;
+
+  // Setting token emojis
+  let defaultTokenEmojis: TokenEmojis = {};
+  try {
+    defaultTokenEmojis = JSON.parse(
+      await fs.readFile(emojiJson, "utf-8")
+    ) as TokenEmojis;
+  } catch (error) {
+    await fs.writeFile(emojiJson, JSON.stringify(defaultTokenEmojis, null, 2));
+  }
+
+  for (const token in defaultTokenEmojis) {
+    tokenEmojis[token] = defaultTokenEmojis[token];
+  }
 
   const admins = await getDocument<StoredAdmins>({ collectionName: "admins" });
   const userIsAdmin =
@@ -64,6 +82,14 @@ export async function setEmoji(ctx: CommandContext<Context>) {
   delete tokenEmojiState[chatId];
 
   tokenEmojis[token] = emoji;
+
+  for (const token in tokenEmojis) {
+    if (!Object.keys(trendingTokens).includes(token)) {
+      delete tokenEmojis[token];
+    }
+  }
+
+  fs.writeFile(emojiJson, JSON.stringify(tokenEmojis, null, 2));
 
   ctx.reply(`${emoji} set as the emoji for the selected token`);
 }
