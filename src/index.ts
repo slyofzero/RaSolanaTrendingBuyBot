@@ -9,6 +9,7 @@ import { syncTrendingTokens, trendingTokens } from "./vars/trending";
 import { memoizeTokenData } from "./vars/tokens";
 import { initiateBotCommands, initiateCallbackQueries } from "./bot";
 import { syncTrendingMessageId } from "./vars/message";
+import { setStoredEmojis } from "./bot/commands/setEmojis";
 
 if (!PORT) {
   log("PORT is undefined");
@@ -33,6 +34,7 @@ log("Bot instance ready");
   initiateCallbackQueries();
 
   await Promise.all([
+    setStoredEmojis(),
     syncAdvertisements(),
     syncTrendingTokens(),
     syncTrendingMessageId(),

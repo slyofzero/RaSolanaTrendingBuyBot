@@ -13,12 +13,9 @@ import {
 import { promises as fs } from "fs";
 import path from "path";
 
-const emojiJson = path.join(__dirname, "../../../", "emojis.json");
+export const emojiJson = path.join(__dirname, "../../../", "emojis.json");
 
-export async function setEmojis(ctx: CommandContext<Context>) {
-  const username = ctx.from?.username;
-  if (!username) return;
-
+export async function setStoredEmojis() {
   // Setting token emojis
   let defaultTokenEmojis: TokenEmojis = {};
   try {
@@ -32,6 +29,11 @@ export async function setEmojis(ctx: CommandContext<Context>) {
   for (const token in defaultTokenEmojis) {
     tokenEmojis[token] = defaultTokenEmojis[token];
   }
+}
+
+export async function setEmojis(ctx: CommandContext<Context>) {
+  const username = ctx.from?.username;
+  if (!username) return;
 
   const admins = await getDocument<StoredAdmins>({ collectionName: "admins" });
   const userIsAdmin =
